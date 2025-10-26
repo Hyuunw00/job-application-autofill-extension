@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Icon Generator</title>
+</head>
+<body>
+  <canvas id="canvas16" width="16" height="16"></canvas>
+  <canvas id="canvas48" width="48" height="48"></canvas>
+  <canvas id="canvas128" width="128" height="128"></canvas>
+
+  <script>
+    function drawIcon(canvas, size) {
+      const ctx = canvas.getContext('2d');
+      
+      // 배경 - 파란색 원형
+      ctx.fillStyle = '#3498db';
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // 문서 아이콘 - 흰색
+      ctx.fillStyle = '#ffffff';
+      const docWidth = size * 0.5;
+      const docHeight = size * 0.6;
+      const docX = (size - docWidth) / 2;
+      const docY = (size - docHeight) / 2;
+      
+      // 문서 본체
+      ctx.fillRect(docX, docY, docWidth, docHeight);
+      
+      // 체크마크 - 녹색
+      ctx.strokeStyle = '#27ae60';
+      ctx.lineWidth = size * 0.08;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      
+      ctx.beginPath();
+      ctx.moveTo(docX + docWidth * 0.25, docY + docHeight * 0.5);
+      ctx.lineTo(docX + docWidth * 0.4, docY + docHeight * 0.65);
+      ctx.lineTo(docX + docWidth * 0.75, docY + docHeight * 0.35);
+      ctx.stroke();
+    }
+
+    drawIcon(document.getElementById('canvas16'), 16);
+    drawIcon(document.getElementById('canvas48'), 48);
+    drawIcon(document.getElementById('canvas128'), 128);
+
+    // PNG로 다운로드
+    setTimeout(() => {
+      ['16', '48', '128'].forEach(size => {
+        const canvas = document.getElementById('canvas' + size);
+        const link = document.createElement('a');
+        link.download = 'icon' + size + '.png';
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+    }, 100);
+  </script>
+</body>
+</html>

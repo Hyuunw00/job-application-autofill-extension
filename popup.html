@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>입사지원 자동완성</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>입사지원 정보 관리</h1>
+
+      <!-- 개인정보 섹션 -->
+      <section class="section">
+        <h2>개인정보</h2>
+        <div class="form-group">
+          <label>이름</label>
+          <input type="text" id="name" placeholder="홍길동" />
+        </div>
+        <div class="form-group">
+          <label>생년월일</label>
+          <input type="text" id="birthdate" placeholder="1990-01-01" />
+        </div>
+        <div class="form-group">
+          <label>전화번호</label>
+          <input type="text" id="phone" placeholder="010-1234-5678" />
+        </div>
+        <div class="form-group">
+          <label>설정할 비밀번호</label>
+          <input
+            type="password"
+            id="password"
+            placeholder="비밀번호를 입력하세요"
+          />
+        </div>
+        <div class="form-group">
+          <label>지원서 등록 사진</label>
+          <input type="file" id="photo" accept="image/*" />
+          <div id="photo-preview" style="margin-top: 10px; display: none;">
+            <img
+              id="photo-preview-img"
+              style="max-width: 150px; max-height: 200px; border: 1px solid #ddd; border-radius: 4px;"
+              alt="사진 미리보기"
+            />
+            <button
+              type="button"
+              id="photo-remove"
+              class="btn-danger"
+              style="display: block; margin-top: 5px; width: auto; padding: 5px 10px; font-size: 12px;"
+            >
+              사진 삭제
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>날짜 형식 설정</label>
+          <select id="date_format">
+            <option value="hyphen">하이픈(-) 사용: 2020-03-15</option>
+            <option value="dot">점(.) 사용: 2020.03.15</option>
+            <option value="none">구분자 없음: 20200315</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>성별</label>
+          <select id="gender">
+            <option value="">선택하세요</option>
+            <option value="남">남</option>
+            <option value="여">여</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>국적</label>
+          <input type="text" id="nationality" placeholder="대한민국" />
+        </div>
+        <div class="form-group">
+          <label>지원자(영어)</label>
+          <input type="text" id="name_english" placeholder="Hong Gil Dong" />
+        </div>
+        <div class="form-group">
+          <label>지원자(한자)</label>
+          <input type="text" id="name_chinese" placeholder="洪吉童" />
+        </div>
+        <div class="form-group">
+          <label>이메일</label>
+          <input type="email" id="email" placeholder="example@email.com" />
+        </div>
+        <div class="form-group">
+          <label>주소</label>
+          <input type="text" id="address" placeholder="서울시 강남구" />
+        </div>
+        <div class="form-group">
+          <label>병역사항</label>
+          <select id="military_service">
+            <option value="">선택하세요</option>
+            <option value="군필">군필</option>
+            <option value="미필">미필</option>
+            <option value="면제">면제</option>
+            <option value="해당없음">해당없음</option>
+          </select>
+        </div>
+        <div id="military_details" style="display: none;">
+          <div class="form-group">
+            <label>군별</label>
+            <select id="military_branch">
+              <option value="">선택하세요</option>
+              <option value="육군">육군</option>
+              <option value="해군">해군</option>
+              <option value="공군">공군</option>
+              <option value="해병대">해병대</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>계급</label>
+            <input type="text" id="military_rank" placeholder="병장" />
+          </div>
+          <div class="form-group">
+            <label>입대년월일</label>
+            <input
+              type="text"
+              id="military_enlistment_date"
+              placeholder="2020-03-15"
+            />
+          </div>
+          <div class="form-group">
+            <label>전역년월일</label>
+            <input
+              type="text"
+              id="military_discharge_date"
+              placeholder="2021-12-14"
+            />
+          </div>
+        </div>
+      </section>
+
+      <!-- 학력 섹션 -->
+      <section class="section">
+        <h2>학력</h2>
+
+        <h3>고등학교</h3>
+        <div class="form-group">
+          <label>학교명</label>
+          <input type="text" id="highschool_name" placeholder="○○고등학교" />
+        </div>
+        <div class="form-group">
+          <label>입학년월</label>
+          <input
+            type="text"
+            id="highschool_start"
+            placeholder="2005-03 또는 2005-03-01"
+          />
+        </div>
+        <div class="form-group">
+          <label>졸업년월</label>
+          <input
+            type="text"
+            id="highschool_graduation"
+            placeholder="2008-02 또는 2008-02-28"
+          />
+        </div>
+        <div class="form-group">
+          <label>고등학교 계열</label>
+          <select id="highschool_type">
+            <option value="">선택하세요</option>
+            <option value="인문계">인문계</option>
+            <option value="자연계">자연계</option>
+            <option value="예체능계">예체능계</option>
+            <option value="특성화고">특성화고</option>
+            <option value="직접입력">직접입력</option>
+            <option value="기타">기타</option>
+          </select>
+          <input
+            type="text"
+            id="highschool_type_custom"
+            placeholder="직접 입력하세요"
+            style="display: none; margin-top: 5px"
+          />
+        </div>
+
+        <h3>대학교</h3>
+        <div class="form-group">
+          <label>학교명</label>
+          <input type="text" id="university_name" placeholder="○○대학교" />
+        </div>
+        <div class="form-group">
+          <label>입학년월</label>
+          <input
+            type="text"
+            id="university_start"
+            placeholder="2008-03 또는 2008-03-01"
+          />
+        </div>
+        <div class="form-group">
+          <label>졸업년월</label>
+          <input
+            type="text"
+            id="university_graduation"
+            placeholder="2015-02 또는 2015-02-28"
+          />
+        </div>
+        <div class="form-group">
+          <label>전공계열</label>
+          <select id="university_type">
+            <option value="">선택하세요</option>
+            <option value="인문사회계열">인문사회계열</option>
+            <option value="자연공학계열">자연공학계열</option>
+            <option value="예체능계열">예체능계열</option>
+            <option value="의학계열">의학계열</option>
+            <option value="직접입력">직접입력</option>
+            <option value="기타">기타</option>
+          </select>
+          <input
+            type="text"
+            id="university_type_custom"
+            placeholder="직접 입력하세요"
+            style="display: none; margin-top: 5px"
+          />
+        </div>
+        <div class="form-group">
+          <label>학과</label>
+          <input type="text" id="university_major" placeholder="컴퓨터공학과" />
+        </div>
+        <div class="form-group">
+          <label>학위</label>
+          <input type="text" id="university_degree" placeholder="학사" />
+        </div>
+        <div class="form-group">
+          <label>학점</label>
+          <input type="text" id="university_gpa" placeholder="3.5" />
+        </div>
+        <div class="form-group">
+          <label>기준학점</label>
+          <input type="text" id="university_max_gpa" placeholder="4.5" />
+        </div>
+      </section>
+
+      <!-- 경력 섹션 -->
+      <section class="section">
+        <h2>경력</h2>
+        <div id="careers-container">
+          <div class="career-item">
+            <h3>경력 1</h3>
+            <div class="form-group">
+              <label>회사명</label>
+              <input type="text" class="career_company" placeholder="○○회사" />
+            </div>
+            <div class="form-group">
+              <label>소속입력값</label>
+              <input
+                type="text"
+                class="career_department"
+                placeholder="개발팀"
+              />
+            </div>
+            <div class="form-group">
+              <label>직급/직책 입력값</label>
+              <input
+                type="text"
+                class="career_position"
+                placeholder="백엔드 개발자"
+              />
+            </div>
+            <div class="form-group">
+              <label>재직기간 (시작)</label>
+              <input
+                type="text"
+                class="career_start"
+                placeholder="2015-03 또는 2015-03-01"
+              />
+            </div>
+            <div class="form-group">
+              <label>재직기간 (종료)</label>
+              <input
+                type="text"
+                class="career_end"
+                placeholder="2020-12 또는 2020-12-31 (재직중인 경우 비워두기)"
+              />
+            </div>
+            <div class="form-group">
+              <label>담당업무</label>
+              <textarea
+                class="career_description"
+                placeholder="주요 담당 업무를 입력하세요"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+        <button id="add-career" class="btn-secondary">경력 추가</button>
+      </section>
+
+      <!-- 외부활동 섹션 -->
+      <section class="section">
+        <h2>외부활동</h2>
+        <div id="activities-container">
+          <div class="activity-item">
+            <h3>활동 1</h3>
+            <div class="form-group">
+              <label>분류</label>
+              <select class="activity_type">
+                <option value="">선택하세요</option>
+                <option value="수상">수상</option>
+                <option value="교육">교육</option>
+                <option value="프로젝트">프로젝트</option>
+                <option value="기타">기타</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>기관/장소</label>
+              <input
+                type="text"
+                class="activity_organization"
+                placeholder="○○기관"
+              />
+            </div>
+            <div class="form-group">
+              <label>시작연월</label>
+              <input
+                type="text"
+                class="activity_start"
+                placeholder="2020-01 또는 2020-01-01"
+              />
+            </div>
+            <div class="form-group">
+              <label>종료연월</label>
+              <input
+                type="text"
+                class="activity_end"
+                placeholder="2020-12 또는 2020-12-31"
+              />
+            </div>
+            <div class="form-group">
+              <label>활동명</label>
+              <input
+                type="text"
+                class="activity_name"
+                placeholder="○○프로젝트"
+              />
+            </div>
+            <div class="form-group">
+              <label>활동 내용</label>
+              <textarea
+                class="activity_description"
+                placeholder="활동 내용을 입력하세요"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+        <button id="add-activity" class="btn-secondary">외부활동 추가</button>
+      </section>
+
+      <!-- 해외 경험 섹션 -->
+      <section class="section">
+        <h2>해외 경험</h2>
+        <div id="overseas-container">
+          <div class="overseas-item">
+            <h3>해외 경험 1</h3>
+            <div class="form-group">
+              <label>국가</label>
+              <input type="text" class="overseas_country" placeholder="미국" />
+            </div>
+            <div class="form-group">
+              <label>목적</label>
+              <select class="overseas_purpose">
+                <option value="">선택하세요</option>
+                <option value="유학">유학</option>
+                <option value="어학연수">어학연수</option>
+                <option value="교환학생">교환학생</option>
+                <option value="인턴십">인턴십</option>
+                <option value="여행">여행</option>
+                <option value="기타">기타</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>기간 (시작)</label>
+              <input
+                type="text"
+                class="overseas_start"
+                placeholder="2018-03 또는 2018-03-01"
+              />
+            </div>
+            <div class="form-group">
+              <label>기간 (종료)</label>
+              <input
+                type="text"
+                class="overseas_end"
+                placeholder="2018-12 또는 2018-12-31"
+              />
+            </div>
+            <div class="form-group">
+              <label>기관/학교명</label>
+              <input
+                type="text"
+                class="overseas_institution"
+                placeholder="○○대학교"
+              />
+            </div>
+            <div class="form-group">
+              <label>상세 내용</label>
+              <textarea
+                class="overseas_description"
+                placeholder="해외 경험 상세 내용을 입력하세요"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+        <button id="add-overseas" class="btn-secondary">해외 경험 추가</button>
+      </section>
+
+      <!-- 어학점수 섹션 -->
+      <section class="section">
+        <h2>어학점수</h2>
+        <div id="language-scores-container">
+          <div class="language-score-item">
+            <h3>어학점수 1</h3>
+            <div class="form-group">
+              <label>어학시험 종류</label>
+              <select class="language_test_type">
+                <option value="">선택하세요</option>
+                <option value="TOEIC">TOEIC</option>
+                <option value="TOEFL">TOEFL</option>
+                <option value="IELTS">IELTS</option>
+                <option value="OPIc">OPIc</option>
+                <option value="TEPS">TEPS</option>
+                <option value="JLPT">JLPT</option>
+                <option value="HSK">HSK</option>
+                <option value="기타">기타</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>점수</label>
+              <input type="text" class="language_score" placeholder="850" />
+            </div>
+            <div class="form-group">
+              <label>취득일</label>
+              <input
+                type="text"
+                class="language_date"
+                placeholder="2020-06 또는 2020-06-15"
+              />
+            </div>
+            <div class="form-group">
+              <label>만료일 (해당시)</label>
+              <input
+                type="text"
+                class="language_expiry"
+                placeholder="2022-06 또는 2022-06-15"
+              />
+            </div>
+          </div>
+        </div>
+        <button id="add-language-score" class="btn-secondary">
+          어학점수 추가
+        </button>
+      </section>
+
+      <!-- 자격증 섹션 -->
+      <section class="section">
+        <h2>자격증</h2>
+        <div id="certificates-container">
+          <div class="certificate-item">
+            <h3>자격증 1</h3>
+            <div class="form-group">
+              <label>자격증명</label>
+              <input
+                type="text"
+                class="certificate_name"
+                placeholder="정보처리기사"
+              />
+            </div>
+            <div class="form-group">
+              <label>발급기관</label>
+              <input
+                type="text"
+                class="certificate_issuer"
+                placeholder="한국산업인력공단"
+              />
+            </div>
+            <div class="form-group">
+              <label>등록번호</label>
+              <input
+                type="text"
+                class="certificate_registration_number"
+                placeholder="12345678"
+              />
+            </div>
+            <div class="form-group">
+              <label>자격번호</label>
+              <input
+                type="text"
+                class="certificate_license_number"
+                placeholder="2024-123456"
+              />
+            </div>
+            <div class="form-group">
+              <label>취득일</label>
+              <input
+                type="text"
+                class="certificate_date"
+                placeholder="2014-08 또는 2014-08-15"
+              />
+            </div>
+          </div>
+        </div>
+        <button id="add-certificate" class="btn-secondary">자격증 추가</button>
+      </section>
+
+      <!-- 장애사항, 보훈여부 섹션 -->
+      <section class="section">
+        <h2>장애사항, 보훈여부</h2>
+        <div class="form-group">
+          <label>장애사항</label>
+          <select id="disability_status">
+            <option value="">해당없음</option>
+            <option value="시각장애">시각장애</option>
+            <option value="청각장애">청각장애</option>
+            <option value="지체장애">지체장애</option>
+            <option value="지적장애">지적장애</option>
+            <option value="자폐성장애">자폐성장애</option>
+            <option value="정신장애">정신장애</option>
+            <option value="뇌병변장애">뇌병변장애</option>
+            <option value="신장장애">신장장애</option>
+            <option value="심장장애">심장장애</option>
+            <option value="호흡기장애">호흡기장애</option>
+            <option value="간장애">간장애</option>
+            <option value="안면장애">안면장애</option>
+            <option value="장루/요루장애">장루/요루장애</option>
+            <option value="간질장애">간질장애</option>
+            <option value="기타">기타</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>장애등급</label>
+          <select id="disability_grade">
+            <option value="">해당없음</option>
+            <option value="1급">1급</option>
+            <option value="2급">2급</option>
+            <option value="3급">3급</option>
+            <option value="4급">4급</option>
+            <option value="5급">5급</option>
+            <option value="6급">6급</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>보훈여부</label>
+          <select id="veteran_status">
+            <option value="">해당없음</option>
+            <option value="국가유공자">국가유공자</option>
+            <option value="보훈대상자">보훈대상자</option>
+            <option value="5.18민주화운동관련자">5.18민주화운동관련자</option>
+            <option value="특수임무유공자">특수임무유공자</option>
+            <option value="기타">기타</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>보훈등급</label>
+          <select id="veteran_grade">
+            <option value="">해당없음</option>
+            <option value="1급">1급</option>
+            <option value="2급">2급</option>
+            <option value="3급">3급</option>
+            <option value="4급">4급</option>
+            <option value="5급">5급</option>
+            <option value="6급">6급</option>
+            <option value="7급">7급</option>
+            <option value="8급">8급</option>
+            <option value="9급">9급</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- 버튼 -->
+      <div class="actions">
+        <button id="save-btn" class="btn-primary">저장</button>
+        <button id="clear-btn" class="btn-danger">초기화</button>
+      </div>
+
+      <div id="message" class="message"></div>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
