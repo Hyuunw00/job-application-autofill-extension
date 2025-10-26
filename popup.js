@@ -33,6 +33,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // 사진 업로드 미리보기 이벤트 리스너 추가
   setupPhotoPreview();
+
+  // 이메일 도메인 선택 이벤트 리스너 추가
+  setupEmailDomainHandler();
 });
 
 // 데이터 저장 함수
@@ -67,14 +70,25 @@ async function collectFormData() {
   let photoData = "";
 
   if (photoFile) {
+    // 새로운 사진이 업로드된 경우
     photoData = await fileToBase64(photoFile);
+  } else {
+    // 새로운 사진이 없으면 기존 저장된 사진 유지
+    const previewImg = document.getElementById("photo-preview-img");
+    if (previewImg && previewImg.src && previewImg.src.startsWith("data:")) {
+      photoData = previewImg.src;
+    }
   }
 
   const data = {
     // 개인정보
     personalInfo: {
       name: document.getElementById("name").value,
-      birthdate: document.getElementById("birthdate").value,
+      birthdate: {
+        year: document.getElementById("birthdate_year").value,
+        month: document.getElementById("birthdate_month").value,
+        day: document.getElementById("birthdate_day").value,
+      },
       phone: document.getElementById("phone").value,
       password: document.getElementById("password").value,
       photo: photoData,
@@ -83,29 +97,54 @@ async function collectFormData() {
       nationality: document.getElementById("nationality").value,
       nameEnglish: document.getElementById("name_english").value,
       nameChinese: document.getElementById("name_chinese").value,
-      email: document.getElementById("email").value,
+      email: {
+        id: document.getElementById("email_id").value,
+        domain: document.getElementById("email_domain").value,
+      },
       address: document.getElementById("address").value,
       militaryService: document.getElementById("military_service").value,
       militaryBranch: document.getElementById("military_branch")?.value || "",
       militaryRank: document.getElementById("military_rank")?.value || "",
-      militaryEnlistmentDate:
-        document.getElementById("military_enlistment_date")?.value || "",
-      militaryDischargeDate:
-        document.getElementById("military_discharge_date")?.value || "",
+      militaryEnlistmentDate: {
+        year: document.getElementById("military_enlistment_year")?.value || "",
+        month: document.getElementById("military_enlistment_month")?.value || "",
+        day: document.getElementById("military_enlistment_day")?.value || "",
+      },
+      militaryDischargeDate: {
+        year: document.getElementById("military_discharge_year")?.value || "",
+        month: document.getElementById("military_discharge_month")?.value || "",
+        day: document.getElementById("military_discharge_day")?.value || "",
+      },
     },
 
     // 학력
     education: {
       highschool: {
         name: document.getElementById("highschool_name").value,
-        start: document.getElementById("highschool_start").value,
-        graduation: document.getElementById("highschool_graduation").value,
+        start: {
+          year: document.getElementById("highschool_start_year").value,
+          month: document.getElementById("highschool_start_month").value,
+          day: document.getElementById("highschool_start_day").value,
+        },
+        graduation: {
+          year: document.getElementById("highschool_graduation_year").value,
+          month: document.getElementById("highschool_graduation_month").value,
+          day: document.getElementById("highschool_graduation_day").value,
+        },
         type: getSelectValue("highschool_type", "highschool_type_custom"),
       },
       university: {
         name: document.getElementById("university_name").value,
-        start: document.getElementById("university_start").value,
-        graduation: document.getElementById("university_graduation").value,
+        start: {
+          year: document.getElementById("university_start_year").value,
+          month: document.getElementById("university_start_month").value,
+          day: document.getElementById("university_start_day").value,
+        },
+        graduation: {
+          year: document.getElementById("university_graduation_year").value,
+          month: document.getElementById("university_graduation_month").value,
+          day: document.getElementById("university_graduation_day").value,
+        },
         type: getSelectValue("university_type", "university_type_custom"),
         major: document.getElementById("university_major").value,
         degree: document.getElementById("university_degree").value,
@@ -184,35 +223,72 @@ function getContainerId(type) {
 function populateForm(data) {
   // 개인정보
   if (data.personalInfo) {
-    Object.keys(data.personalInfo).forEach((key) => {
-      // 사진은 별도 처리
-      if (key === "photo") {
-        if (data.personalInfo[key]) {
-          const previewImg = document.getElementById("photo-preview-img");
-          const previewDiv = document.getElementById("photo-preview");
-          if (previewImg && previewDiv) {
-            previewImg.src = data.personalInfo[key];
-            previewDiv.style.display = "block";
-          }
-        }
-        return;
+    // 사진 처리
+    if (data.personalInfo.photo) {
+      const previewImg = document.getElementById("photo-preview-img");
+      const previewDiv = document.getElementById("photo-preview");
+      if (previewImg && previewDiv) {
+        previewImg.src = data.personalInfo.photo;
+        previewDiv.style.display = "block";
       }
+    }
 
-      let elementId = key;
-      if (key === "nameEnglish") elementId = "name_english";
-      else if (key === "nameChinese") elementId = "name_chinese";
-      else if (key === "dateFormat") elementId = "date_format";
-      else if (key === "militaryService") elementId = "military_service";
-      else if (key === "militaryBranch") elementId = "military_branch";
-      else if (key === "militaryRank") elementId = "military_rank";
-      else if (key === "militaryEnlistmentDate")
-        elementId = "military_enlistment_date";
-      else if (key === "militaryDischargeDate")
-        elementId = "military_discharge_date";
+    // 일반 필드 처리
+    const simpleFields = {
+      name: "name",
+      phone: "phone",
+      password: "password",
+      gender: "gender",
+      nationality: "nationality",
+      nameEnglish: "name_english",
+      nameChinese: "name_chinese",
+      address: "address",
+      dateFormat: "date_format",
+      militaryService: "military_service",
+      militaryBranch: "military_branch",
+      militaryRank: "military_rank",
+    };
 
+    Object.keys(simpleFields).forEach((key) => {
+      const elementId = simpleFields[key];
       const element = document.getElementById(elementId);
-      if (element) element.value = data.personalInfo[key];
+      if (element && data.personalInfo[key]) {
+        element.value = data.personalInfo[key];
+      }
     });
+
+    // 이메일 분리 필드 처리
+    if (data.personalInfo.email) {
+      if (typeof data.personalInfo.email === "object") {
+        // 새로운 형식 (분리된 이메일)
+        if (data.personalInfo.email.id) {
+          document.getElementById("email_id").value = data.personalInfo.email.id;
+        }
+        if (data.personalInfo.email.domain) {
+          document.getElementById("email_domain").value = data.personalInfo.email.domain;
+        }
+      } else {
+        // 이전 형식 (통합 이메일) - 자동 분리
+        const emailParts = data.personalInfo.email.split("@");
+        if (emailParts.length === 2) {
+          document.getElementById("email_id").value = emailParts[0];
+          document.getElementById("email_domain").value = emailParts[1];
+        }
+      }
+    }
+
+    // 생년월일
+    if (data.personalInfo.birthdate) {
+      setDateFields("birthdate", data.personalInfo.birthdate);
+    }
+
+    // 병역 날짜
+    if (data.personalInfo.militaryEnlistmentDate) {
+      setDateFields("military_enlistment", data.personalInfo.militaryEnlistmentDate);
+    }
+    if (data.personalInfo.militaryDischargeDate) {
+      setDateFields("military_discharge", data.personalInfo.militaryDischargeDate);
+    }
 
     // 병역사항이 군필이면 상세 항목 표시
     if (data.personalInfo.militaryService === "군필") {
@@ -225,34 +301,24 @@ function populateForm(data) {
   if (data.education) {
     // 고등학교
     if (data.education.highschool) {
-      Object.keys(data.education.highschool).forEach((key) => {
-        if (key === "type") {
-          setSelectValue(
-            "highschool_type",
-            "highschool_type_custom",
-            data.education.highschool[key]
-          );
-        } else {
-          const element = document.getElementById(`highschool_${key}`);
-          if (element) element.value = data.education.highschool[key];
-        }
-      });
+      const hs = data.education.highschool;
+      if (hs.name) document.getElementById("highschool_name").value = hs.name;
+      if (hs.type) setSelectValue("highschool_type", "highschool_type_custom", hs.type);
+      if (hs.start) setDateFields("highschool_start", hs.start);
+      if (hs.graduation) setDateFields("highschool_graduation", hs.graduation);
     }
 
     // 대학교
     if (data.education.university) {
-      Object.keys(data.education.university).forEach((key) => {
-        if (key === "type") {
-          setSelectValue(
-            "university_type",
-            "university_type_custom",
-            data.education.university[key]
-          );
-        } else {
-          const element = document.getElementById(`university_${key}`);
-          if (element) element.value = data.education.university[key];
-        }
-      });
+      const uni = data.education.university;
+      if (uni.name) document.getElementById("university_name").value = uni.name;
+      if (uni.type) setSelectValue("university_type", "university_type_custom", uni.type);
+      if (uni.major) document.getElementById("university_major").value = uni.major;
+      if (uni.degree) document.getElementById("university_degree").value = uni.degree;
+      if (uni.gpa) document.getElementById("university_gpa").value = uni.gpa;
+      if (uni.maxGpa) document.getElementById("university_max_gpa").value = uni.maxGpa;
+      if (uni.start) setDateFields("university_start", uni.start);
+      if (uni.graduation) setDateFields("university_graduation", uni.graduation);
     }
   }
 
@@ -345,11 +411,19 @@ function getItemTemplate(type, count) {
         </div>
         <div class="form-group">
           <label>재직기간 (시작)</label>
-          <input type="text" class="career_start" placeholder="2015-03" />
+          <div class="date-group">
+            <input type="text" class="career_start_year" placeholder="년" maxlength="4" />
+            <input type="text" class="career_start_month" placeholder="월" maxlength="2" />
+            <input type="text" class="career_start_day" placeholder="일" maxlength="2" />
+          </div>
         </div>
         <div class="form-group">
           <label>재직기간 (종료)</label>
-          <input type="text" class="career_end" placeholder="2020-12 (재직중인 경우 비워두기)" />
+          <div class="date-group">
+            <input type="text" class="career_end_year" placeholder="년" maxlength="4" />
+            <input type="text" class="career_end_month" placeholder="월" maxlength="2" />
+            <input type="text" class="career_end_day" placeholder="일" maxlength="2" />
+          </div>
         </div>
         <div class="form-group">
           <label>담당업무</label>
@@ -379,7 +453,11 @@ function getItemTemplate(type, count) {
         </div>
         <div class="form-group">
           <label>취득일</label>
-          <input type="text" class="certificate_date" placeholder="2014-08" />
+          <div class="date-group">
+            <input type="text" class="certificate_date_year" placeholder="년" maxlength="4" />
+            <input type="text" class="certificate_date_month" placeholder="월" maxlength="2" />
+            <input type="text" class="certificate_date_day" placeholder="일" maxlength="2" />
+          </div>
         </div>
         <button type="button" class="btn-danger remove-item" style="margin-top: 10px;">삭제</button>
       </div>
@@ -402,12 +480,20 @@ function getItemTemplate(type, count) {
           <input type="text" class="activity_organization" placeholder="○○기관" />
         </div>
         <div class="form-group">
-          <label>시작연월</label>
-          <input type="text" class="activity_start" placeholder="2020-01" />
+          <label>시작년월일</label>
+          <div class="date-group">
+            <input type="text" class="activity_start_year" placeholder="년" maxlength="4" />
+            <input type="text" class="activity_start_month" placeholder="월" maxlength="2" />
+            <input type="text" class="activity_start_day" placeholder="일" maxlength="2" />
+          </div>
         </div>
         <div class="form-group">
-          <label>종료연월</label>
-          <input type="text" class="activity_end" placeholder="2020-12" />
+          <label>종료년월일</label>
+          <div class="date-group">
+            <input type="text" class="activity_end_year" placeholder="년" maxlength="4" />
+            <input type="text" class="activity_end_month" placeholder="월" maxlength="2" />
+            <input type="text" class="activity_end_day" placeholder="일" maxlength="2" />
+          </div>
         </div>
         <div class="form-group">
           <label>활동명</label>
@@ -441,11 +527,19 @@ function getItemTemplate(type, count) {
         </div>
         <div class="form-group">
           <label>기간 (시작)</label>
-          <input type="text" class="overseas_start" placeholder="2018-03" />
+          <div class="date-group">
+            <input type="text" class="overseas_start_year" placeholder="년" maxlength="4" />
+            <input type="text" class="overseas_start_month" placeholder="월" maxlength="2" />
+            <input type="text" class="overseas_start_day" placeholder="일" maxlength="2" />
+          </div>
         </div>
         <div class="form-group">
           <label>기간 (종료)</label>
-          <input type="text" class="overseas_end" placeholder="2018-12" />
+          <div class="date-group">
+            <input type="text" class="overseas_end_year" placeholder="년" maxlength="4" />
+            <input type="text" class="overseas_end_month" placeholder="월" maxlength="2" />
+            <input type="text" class="overseas_end_day" placeholder="일" maxlength="2" />
+          </div>
         </div>
         <div class="form-group">
           <label>기관/학교명</label>
@@ -481,11 +575,19 @@ function getItemTemplate(type, count) {
         </div>
         <div class="form-group">
           <label>취득일</label>
-          <input type="text" class="language_date" placeholder="2020-06" />
+          <div class="date-group">
+            <input type="text" class="language_date_year" placeholder="년" maxlength="4" />
+            <input type="text" class="language_date_month" placeholder="월" maxlength="2" />
+            <input type="text" class="language_date_day" placeholder="일" maxlength="2" />
+          </div>
         </div>
         <div class="form-group">
           <label>만료일 (해당시)</label>
-          <input type="text" class="language_expiry" placeholder="2022-06" />
+          <div class="date-group">
+            <input type="text" class="language_expiry_year" placeholder="년" maxlength="4" />
+            <input type="text" class="language_expiry_month" placeholder="월" maxlength="2" />
+            <input type="text" class="language_expiry_day" placeholder="일" maxlength="2" />
+          </div>
         </div>
         <button type="button" class="btn-danger remove-item" style="margin-top: 10px;">삭제</button>
       </div>
@@ -586,6 +688,24 @@ function showMessage(text, type) {
   }, 3000);
 }
 
+// 날짜 필드 설정 헬퍼 함수
+function setDateFields(prefix, dateObj) {
+  if (!dateObj) return;
+
+  if (dateObj.year) {
+    const yearEl = document.getElementById(`${prefix}_year`);
+    if (yearEl) yearEl.value = dateObj.year;
+  }
+  if (dateObj.month) {
+    const monthEl = document.getElementById(`${prefix}_month`);
+    if (monthEl) monthEl.value = dateObj.month;
+  }
+  if (dateObj.day) {
+    const dayEl = document.getElementById(`${prefix}_day`);
+    if (dayEl) dayEl.value = dateObj.day;
+  }
+}
+
 // 셀렉트 박스 값 가져오기 (직접입력 포함)
 function getSelectValue(selectId, customInputId) {
   const select = document.getElementById(selectId);
@@ -624,6 +744,20 @@ function setSelectValue(selectId, customInputId, value) {
     select.value = "직접입력";
     customInput.value = value;
     customInput.style.display = "block";
+  }
+}
+
+// 이메일 도메인 선택 핸들러 설정
+function setupEmailDomainHandler() {
+  const domainSelect = document.getElementById("email_domain_select");
+  const domainInput = document.getElementById("email_domain");
+
+  if (domainSelect && domainInput) {
+    domainSelect.addEventListener("change", function () {
+      if (this.value) {
+        domainInput.value = this.value;
+      }
+    });
   }
 }
 
