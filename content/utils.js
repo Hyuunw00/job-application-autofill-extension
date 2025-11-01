@@ -1,5 +1,38 @@
 // 유틸리티 함수들
 
+// 날짜 문자열을 객체로 파싱
+function parseDateString(dateString) {
+  if (!dateString) return null;
+
+  // 이미 객체 형태인 경우
+  if (typeof dateString === "object" && dateString.year) {
+    return dateString;
+  }
+
+  // 문자열 파싱 (YYYY-MM-DD, YYYY.MM.DD, YYYYMMDD 등)
+  const cleaned = String(dateString).replace(/[^0-9]/g, "");
+
+  if (cleaned.length === 8) {
+    // YYYYMMDD
+    return {
+      year: cleaned.substring(0, 4),
+      month: cleaned.substring(4, 6),
+      day: cleaned.substring(6, 8)
+    };
+  } else if (cleaned.length === 6) {
+    // YYMMDD
+    const yy = cleaned.substring(0, 2);
+    const year = (parseInt(yy) > 50 ? "19" : "20") + yy;
+    return {
+      year: year,
+      month: cleaned.substring(2, 4),
+      day: cleaned.substring(4, 6)
+    };
+  }
+
+  return null;
+}
+
 // 날짜 형식 변환 함수
 function formatDate(dateObj, format) {
   if (!dateObj) return "";

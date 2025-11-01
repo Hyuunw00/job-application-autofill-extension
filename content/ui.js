@@ -1,6 +1,6 @@
 // UI 관련 함수들 (알림 모달)
 
-// 알림 표시
+// 알림 표시 (V2: 성공/실패 분리)
 function showNotification(message, type, filledFields = []) {
   // 기존 알림 제거
   const existingNotification = document.getElementById(
@@ -9,6 +9,10 @@ function showNotification(message, type, filledFields = []) {
   if (existingNotification) {
     existingNotification.remove();
   }
+
+  // 성공/실패 필드 분리
+  const successFields = filledFields.filter(f => f.success);
+  const failedFields = filledFields.filter(f => !f.success);
 
   const notification = document.createElement("div");
   notification.id = "auto-fill-notification";
@@ -64,32 +68,94 @@ function showNotification(message, type, filledFields = []) {
 
   notification.appendChild(header);
 
-  // 채워진 필드 목록
-  if (filledFields.length > 0) {
-    const list = document.createElement("div");
-    list.style.cssText = `
+  // 성공 필드 목록
+  if (successFields.length > 0) {
+    const successSection = document.createElement("div");
+    successSection.style.cssText = `
       font-size: 12px;
       font-weight: normal;
       opacity: 0.9;
       line-height: 1.6;
       border-top: 1px solid rgba(255,255,255,0.2);
       padding-top: 12px;
-      max-height: 300px;
+      margin-bottom: ${failedFields.length > 0 ? "12px" : "0"};
+    `;
+
+    const successTitle = document.createElement("div");
+    successTitle.style.cssText = `
+      font-weight: bold;
+      margin-bottom: 8px;
+      font-size: 13px;
+    `;
+    successTitle.textContent = `✓ 성공 (${successFields.length}개)`;
+    successSection.appendChild(successTitle);
+
+    const successList = document.createElement("div");
+    successList.style.cssText = `
+      max-height: 200px;
       overflow-y: auto;
     `;
 
-    filledFields.forEach((field, index) => {
+    successFields.forEach((field, index) => {
       const item = document.createElement("div");
       item.style.cssText = `
         margin-bottom: 6px;
         padding: 4px 0;
-        ${index < filledFields.length - 1 ? "border-bottom: 1px solid rgba(255,255,255,0.1);" : ""}
+        ${index < successFields.length - 1 ? "border-bottom: 1px solid rgba(255,255,255,0.1);" : ""}
       `;
       item.innerHTML = `<strong>${field.label}:</strong> ${field.value}`;
-      list.appendChild(item);
+      successList.appendChild(item);
     });
 
-    notification.appendChild(list);
+    successSection.appendChild(successList);
+    notification.appendChild(successSection);
+  }
+
+  // 실패 필드 목록
+  if (failedFields.length > 0) {
+    const failSection = document.createElement("div");
+    failSection.style.cssText = `
+      font-size: 12px;
+      font-weight: normal;
+      opacity: 0.9;
+      line-height: 1.6;
+      border-top: 1px solid rgba(255,255,255,0.2);
+      padding-top: 12px;
+      background: rgba(0,0,0,0.1);
+      margin: 0 -20px;
+      padding: 12px 20px;
+      border-radius: 0 0 8px 8px;
+    `;
+
+    const failTitle = document.createElement("div");
+    failTitle.style.cssText = `
+      font-weight: bold;
+      margin-bottom: 8px;
+      font-size: 13px;
+    `;
+    failTitle.textContent = `✗ 실패 (${failedFields.length}개)`;
+    failSection.appendChild(failTitle);
+
+    const failList = document.createElement("div");
+    failList.style.cssText = `
+      max-height: 200px;
+      overflow-y: auto;
+    `;
+
+    failedFields.forEach((field, index) => {
+      const item = document.createElement("div");
+      item.style.cssText = `
+        margin-bottom: 6px;
+        padding: 4px 0;
+        ${index < failedFields.length - 1 ? "border-bottom: 1px solid rgba(255,255,255,0.1);" : ""}
+      `;
+      const reasonText = field.reason ? `<br><span style="font-size: 11px; opacity: 0.8;">${field.reason}</span>` : "";
+      item.innerHTML = `<strong>${field.label}:</strong> ${field.value}${reasonText}`;
+      failList.appendChild(item);
+    });
+
+    failSection.appendChild(failList);
+    notification.appendChild(failSection);
   }
 
   // 애니메이션 CSS 추가

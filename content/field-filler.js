@@ -3,9 +3,9 @@
 // 채워진 필드 목록 추적
 let filledFieldsList = [];
 
-// 필드 채우기
-function fillField(field, value) {
-  if (!value) return;
+// 필드 채우기 (V2: async + 검증)
+async function fillField(field, value) {
+  if (!value) return { success: false, reason: "No value" };
 
   try {
     // 필드 레이블 찾기
@@ -106,13 +106,49 @@ function fillField(field, value) {
       field.readOnly = true;
     }
 
-    // 채워진 필드 목록에 추가
-    filledFieldsList.push({
+    // 3. 100ms 대기 후 검증
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // 값이 실제로 입력되었는지 확인
+    let actualValue;
+    if (field.type === "checkbox" || field.type === "radio") {
+      actualValue = field.checked ? "checked" : "unchecked";
+      var success = field.checked;
+    } else {
+      actualValue = field.value;
+      var success = actualValue === String(value);
+    }
+
+    // 4. 시각적 피드백 (테두리)
+    if (success) {
+      field.style.border = "2px solid #27ae60 !important";
+    } else {
+      field.style.border = "2px solid #e74c3c !important";
+    }
+
+    // 결과 기록
+    const result = {
       label: labelText,
-      value: String(value).length > 30 ? String(value).substring(0, 30) + "..." : value
-    });
+      value: String(value).length > 30 ? String(value).substring(0, 30) + "..." : value,
+      success: success,
+      fieldElement: field,
+      reason: success ? null : `Expected: ${value}, Got: ${actualValue}`
+    };
+
+    filledFieldsList.push(result);
+    return result;
+
   } catch (error) {
     console.error("필드 채우기 오류:", error);
+    const result = {
+      label: "오류",
+      value: String(value),
+      success: false,
+      fieldElement: field,
+      reason: error.message
+    };
+    filledFieldsList.push(result);
+    return result;
   }
 }
 

@@ -3,12 +3,17 @@
 // 저장된 데이터 (전역 변수)
 let savedData = null;
 
-// 자동완성 실행
-function autoFillForm() {
+// 자동완성 실행 (V2: async)
+async function autoFillForm() {
   if (!savedData) {
     showNotification("저장된 데이터가 없습니다.", "error", []);
     return;
   }
+
+  // 이전 자동완성의 테두리 제거
+  document.querySelectorAll('input, textarea, select').forEach(field => {
+    field.style.border = '';
+  });
 
   // 사용된 필드 초기화
   clearUsedFields();
@@ -20,7 +25,7 @@ function autoFillForm() {
   // 개인정보 자동완성
   if (savedData.personalInfo) {
     try {
-      filledCount += fillPersonalInfo(savedData.personalInfo);
+      filledCount += await fillPersonalInfo(savedData.personalInfo);
     } catch (error) {
       console.error("개인정보 자동완성 오류:", error);
       errorCount++;
@@ -30,7 +35,7 @@ function autoFillForm() {
   // 학력 자동완성
   if (savedData.education) {
     try {
-      filledCount += fillEducation(savedData.education);
+      filledCount += await fillEducation(savedData.education);
     } catch (error) {
       console.error("학력 자동완성 오류:", error);
       errorCount++;
@@ -40,7 +45,7 @@ function autoFillForm() {
   // 경력 자동완성
   if (savedData.careers) {
     try {
-      filledCount += fillCareers(savedData.careers);
+      filledCount += await fillCareers(savedData.careers);
     } catch (error) {
       console.error("경력 자동완성 오류:", error);
       errorCount++;
@@ -50,7 +55,7 @@ function autoFillForm() {
   // 외부활동 자동완성
   if (savedData.activities) {
     try {
-      filledCount += fillActivities(savedData.activities);
+      filledCount += await fillActivities(savedData.activities);
     } catch (error) {
       console.error("외부활동 자동완성 오류:", error);
       errorCount++;
@@ -60,7 +65,7 @@ function autoFillForm() {
   // 해외 경험 자동완성
   if (savedData.overseas) {
     try {
-      filledCount += fillOverseas(savedData.overseas);
+      filledCount += await fillOverseas(savedData.overseas);
     } catch (error) {
       console.error("해외 경험 자동완성 오류:", error);
       errorCount++;
@@ -70,7 +75,7 @@ function autoFillForm() {
   // 어학점수 자동완성
   if (savedData.languageScores) {
     try {
-      filledCount += fillLanguageScores(savedData.languageScores);
+      filledCount += await fillLanguageScores(savedData.languageScores);
     } catch (error) {
       console.error("어학점수 자동완성 오류:", error);
       errorCount++;
@@ -80,7 +85,7 @@ function autoFillForm() {
   // 자격증 자동완성
   if (savedData.certificates) {
     try {
-      filledCount += fillCertificates(savedData.certificates);
+      filledCount += await fillCertificates(savedData.certificates);
     } catch (error) {
       console.error("자격증 자동완성 오류:", error);
       errorCount++;
@@ -90,7 +95,7 @@ function autoFillForm() {
   // 장애사항, 보훈여부 자동완성
   if (savedData.disabilityVeteran) {
     try {
-      filledCount += fillDisabilityVeteran(savedData.disabilityVeteran);
+      filledCount += await fillDisabilityVeteran(savedData.disabilityVeteran);
     } catch (error) {
       console.error("장애사항/보훈여부 자동완성 오류:", error);
       errorCount++;
@@ -112,8 +117,8 @@ function autoFillForm() {
   }
 }
 
-// 개인정보 자동완성
-function fillPersonalInfo(personalInfo) {
+// 개인정보 자동완성 (V2: async)
+async function fillPersonalInfo(personalInfo) {
   const dateFormat = personalInfo.dateFormat || "hyphen";
 
   const mappings = [
@@ -142,7 +147,25 @@ function fillPersonalInfo(personalInfo) {
     },
   ];
 
-  let filledCount = fillFieldsByKeywords(mappings);
+  let filledCount = await fillFieldsByKeywords(mappings);
+
+  // 생년월일 분리 필드 처리 (년/월/일)
+  if (personalInfo.birthdate) {
+    try {
+      // 생년월일을 객체로 변환
+      const birthdateObj = parseDateString(personalInfo.birthdate);
+      if (birthdateObj) {
+        const dateResult = await fillDateFields(
+          birthdateObj,
+          ["생년월일", "birth", "생일", "출생"],
+          savedData
+        );
+        if (dateResult > 0) filledCount += dateResult;
+      }
+    } catch (error) {
+      console.error("생년월일 분리 필드 입력 오류:", error);
+    }
+  }
 
   // 비밀번호 필드 처리 (2개까지 허용 - 비밀번호 + 비밀번호 확인)
   if (personalInfo.password) {
@@ -152,14 +175,14 @@ function fillPersonalInfo(personalInfo) {
       // 첫 번째 비밀번호 필드
       const passwordField1 = findFieldByKeywords(passwordKeywords, 0);
       if (passwordField1) {
-        fillField(passwordField1, personalInfo.password);
+        await fillField(passwordField1, personalInfo.password);
         filledCount++;
       }
 
       // 두 번째 비밀번호 필드 (비밀번호 확인)
       const passwordField2 = findFieldByKeywords(passwordKeywords, 1);
       if (passwordField2) {
-        fillField(passwordField2, personalInfo.password);
+        await fillField(passwordField2, personalInfo.password);
         filledCount++;
       }
     } catch (error) {
@@ -170,17 +193,17 @@ function fillPersonalInfo(personalInfo) {
   // 전화번호 분리 필드 처리
   if (personalInfo.phone) {
     try {
-      const phoneResult = fillPhoneNumber(personalInfo.phone, ["phone", "휴대폰", "핸드폰", "연락처"]);
+      const phoneResult = await fillPhoneNumber(personalInfo.phone, ["phone", "휴대폰", "핸드폰", "연락처"]);
       if (phoneResult > 0) filledCount += phoneResult;
     } catch (error) {
       console.error("전화번호 입력 오류:", error);
     }
   }
 
-  // 이메일 분리 필드 처리
+  // 이메일 분리 필드 처리 (이메일 확인 필드 포함)
   if (personalInfo.email) {
     try {
-      const emailResult = fillEmailAddress(personalInfo.email, ["email", "이메일", "메일"]);
+      const emailResult = await fillEmailAddress(personalInfo.email, ["email", "이메일", "메일"], true);
       if (emailResult > 0) filledCount += emailResult;
     } catch (error) {
       console.error("이메일 입력 오류:", error);
@@ -200,8 +223,8 @@ function fillPersonalInfo(personalInfo) {
   return filledCount;
 }
 
-// 학력 자동완성
-function fillEducation(education) {
+// 학력 자동완성 (V2: async)
+async function fillEducation(education) {
   let filledCount = 0;
   const dateFormat = savedData.personalInfo.dateFormat || "hyphen";
 
@@ -225,7 +248,7 @@ function fillEducation(education) {
         keywords: ["고등학교계열", "고교계열"],
       },
     ];
-    filledCount += fillFieldsByKeywords(highschoolMappings);
+    filledCount += await fillFieldsByKeywords(highschoolMappings);
   }
 
   // 대학교
@@ -255,18 +278,19 @@ function fillEducation(education) {
         keywords: ["기준학점", "만점", "max"],
       },
     ];
-    filledCount += fillFieldsByKeywords(universityMappings);
+    filledCount += await fillFieldsByKeywords(universityMappings);
   }
 
   return filledCount;
 }
 
-// 경력 자동완성
-function fillCareers(careers) {
+// 경력 자동완성 (V2: async)
+async function fillCareers(careers) {
   let filledCount = 0;
   const dateFormat = savedData.personalInfo.dateFormat || "hyphen";
 
-  careers.forEach((career, index) => {
+  for (let index = 0; index < careers.length; index++) {
+    const career = careers[index];
     const careerMappings = [
       {
         data: career.career_company,
@@ -294,18 +318,19 @@ function fillCareers(careers) {
       },
     ];
 
-    filledCount += fillFieldsByKeywords(careerMappings, index);
-  });
+    filledCount += await fillFieldsByKeywords(careerMappings, index);
+  }
 
   return filledCount;
 }
 
-// 외부활동 자동완성
-function fillActivities(activities) {
+// 외부활동 자동완성 (V2: async)
+async function fillActivities(activities) {
   let filledCount = 0;
   const dateFormat = savedData.personalInfo.dateFormat || "hyphen";
 
-  activities.forEach((activity, index) => {
+  for (let index = 0; index < activities.length; index++) {
+    const activity = activities[index];
     const activityMappings = [
       { data: activity.activity_type, keywords: ["활동분류", "분류", "type"] },
       {
@@ -327,18 +352,19 @@ function fillActivities(activities) {
       },
     ];
 
-    filledCount += fillFieldsByKeywords(activityMappings, index);
-  });
+    filledCount += await fillFieldsByKeywords(activityMappings, index);
+  }
 
   return filledCount;
 }
 
-// 해외 경험 자동완성
-function fillOverseas(overseas) {
+// 해외 경험 자동완성 (V2: async)
+async function fillOverseas(overseas) {
   let filledCount = 0;
   const dateFormat = savedData.personalInfo.dateFormat || "hyphen";
 
-  overseas.forEach((overseasItem, index) => {
+  for (let index = 0; index < overseas.length; index++) {
+    const overseasItem = overseas[index];
     const overseasMappings = [
       { data: overseasItem.overseas_country, keywords: ["국가", "country"] },
       { data: overseasItem.overseas_purpose, keywords: ["목적", "purpose"] },
@@ -360,18 +386,19 @@ function fillOverseas(overseas) {
       },
     ];
 
-    filledCount += fillFieldsByKeywords(overseasMappings, index);
-  });
+    filledCount += await fillFieldsByKeywords(overseasMappings, index);
+  }
 
   return filledCount;
 }
 
-// 어학점수 자동완성
-function fillLanguageScores(languageScores) {
+// 어학점수 자동완성 (V2: async)
+async function fillLanguageScores(languageScores) {
   let filledCount = 0;
   const dateFormat = savedData.personalInfo.dateFormat || "hyphen";
 
-  languageScores.forEach((score, index) => {
+  for (let index = 0; index < languageScores.length; index++) {
+    const score = languageScores[index];
     const scoreMappings = [
       {
         data: score.language_test_type,
@@ -388,18 +415,19 @@ function fillLanguageScores(languageScores) {
       },
     ];
 
-    filledCount += fillFieldsByKeywords(scoreMappings, index);
-  });
+    filledCount += await fillFieldsByKeywords(scoreMappings, index);
+  }
 
   return filledCount;
 }
 
-// 자격증 자동완성
-function fillCertificates(certificates) {
+// 자격증 자동완성 (V2: async)
+async function fillCertificates(certificates) {
   let filledCount = 0;
   const dateFormat = savedData.personalInfo.dateFormat || "hyphen";
 
-  certificates.forEach((certificate, index) => {
+  for (let index = 0; index < certificates.length; index++) {
+    const certificate = certificates[index];
     const certificateMappings = [
       {
         data: certificate.certificate_name,
@@ -423,14 +451,14 @@ function fillCertificates(certificates) {
       },
     ];
 
-    filledCount += fillFieldsByKeywords(certificateMappings, index);
-  });
+    filledCount += await fillFieldsByKeywords(certificateMappings, index);
+  }
 
   return filledCount;
 }
 
-// 장애사항, 보훈여부 자동완성
-function fillDisabilityVeteran(disabilityVeteran) {
+// 장애사항, 보훈여부 자동완성 (V2: async)
+async function fillDisabilityVeteran(disabilityVeteran) {
   const mappings = [
     {
       data: disabilityVeteran.disabilityStatus,
@@ -450,5 +478,5 @@ function fillDisabilityVeteran(disabilityVeteran) {
     },
   ];
 
-  return fillFieldsByKeywords(mappings);
+  return await fillFieldsByKeywords(mappings);
 }
