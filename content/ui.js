@@ -14,6 +14,18 @@ function showNotification(message, type, filledFields = []) {
   const successFields = filledFields.filter(f => f.success);
   const failedFields = filledFields.filter(f => !f.success);
 
+  // 타입에 따른 배경색 결정
+  let backgroundColor;
+  if (type === "success") {
+    backgroundColor = "#27ae60";
+  } else if (type === "warning") {
+    backgroundColor = "#f39c12"; // 주황색
+  } else if (type === "info") {
+    backgroundColor = "#3498db"; // 파란색
+  } else {
+    backgroundColor = "#e74c3c"; // 빨간색 (error)
+  }
+
   const notification = document.createElement("div");
   notification.id = "auto-fill-notification";
   notification.style.cssText = `
@@ -21,7 +33,7 @@ function showNotification(message, type, filledFields = []) {
     top: 80px;
     right: 20px;
     z-index: 10001;
-    background: ${type === "success" ? "#27ae60" : "#e74c3c"};
+    background: ${backgroundColor};
     color: white;
     padding: 16px 20px;
     border-radius: 8px;
@@ -32,6 +44,7 @@ function showNotification(message, type, filledFields = []) {
     max-width: 400px;
     max-height: 500px;
     overflow-y: auto;
+    white-space: pre-wrap;
   `;
 
   // 제목과 닫기 버튼

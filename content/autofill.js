@@ -1,12 +1,22 @@
-// 자동완성 메인 로직
+// 자동완성 메인 로직 (V4: 완전 AI 자율 방식)
 
 // 저장된 데이터 (전역 변수)
 let savedData = null;
 
-// 자동완성 실행 (V2: async)
+// 자동완성 실행
 async function autoFillForm() {
   if (!savedData) {
     showNotification("저장된 데이터가 없습니다.", "error", []);
+    return;
+  }
+
+  // AI 설정 확인
+  const aiSettings = savedData.aiSettings || { mode: 'free', model: 'gpt-4o-mini' };
+  console.log('[Autofill] AI 설정:', aiSettings);
+
+  // API 모드인데 API 키가 없는 경우
+  if (aiSettings.mode === 'api' && !aiSettings.apiKey) {
+    showNotification("API 키가 설정되지 않았습니다. 익스텐션 설정에서 API 키를 입력하세요.", "error", []);
     return;
   }
 
@@ -19,464 +29,256 @@ async function autoFillForm() {
   clearUsedFields();
   clearFilledFieldsList();
 
-  let filledCount = 0;
-  let errorCount = 0;
+  try {
+    // 1단계: AI가 페이지 분석하고 코드 생성
+    showNotification("🤖 AI가 페이지를 분석하고 코드 생성 중...", "info", []);
 
-  // 개인정보 자동완성
-  if (savedData.personalInfo) {
-    try {
-      filledCount += await fillPersonalInfo(savedData.personalInfo);
-    } catch (error) {
-      console.error("개인정보 자동완성 오류:", error);
-      errorCount++;
+    const result = await analyzePageWithAI(savedData, aiSettings);
+
+    if (!result.code) {
+      showNotification("AI가 코드를 생성하지 못했습니다.", "error", []);
+      return;
     }
-  }
 
-  // 학력 자동완성
-  if (savedData.education) {
-    try {
-      filledCount += await fillEducation(savedData.education);
-    } catch (error) {
-      console.error("학력 자동완성 오류:", error);
-      errorCount++;
+    // 2단계: AI가 생성한 코드 실행
+    showNotification("⚡ 자동완성 실행 중...", "info", []);
+    console.log('[Autofill] AI 생성 코드 실행');
+
+    const execResult = await executeSafeCode(result.code);
+
+    if (!execResult.success) {
+      console.error('[Autofill] 코드 실행 실패:', execResult.error);
+      showNotification(`코드 실행 오류: ${execResult.error}`, "error", []);
+      return;
     }
-  }
 
-  // 경력 자동완성
-  if (savedData.careers) {
-    try {
-      filledCount += await fillCareers(savedData.careers);
-    } catch (error) {
-      console.error("경력 자동완성 오류:", error);
-      errorCount++;
+    // 3단계: 실패 감지 및 피드백
+    await new Promise(r => setTimeout(r, 1000)); // DOM 업데이트 대기
+
+    const missedFields = detectMissedFields(savedData);
+
+    if (missedFields.length === 0) {
+      // 모든 필드 채워짐 - 성공
+      showNotification("✅ 자동완성 완료!", "success", []);
+    } else {
+      // 일부 필드 실패 - 사용자에게 피드백
+      console.log(`[Autofill] 채워지지 않은 필드 ${missedFields.length}개 발견:`, missedFields);
+      showUserFeedback(missedFields);
     }
-  }
 
-  // 외부활동 자동완성
-  if (savedData.activities) {
-    try {
-      filledCount += await fillActivities(savedData.activities);
-    } catch (error) {
-      console.error("외부활동 자동완성 오류:", error);
-      errorCount++;
+  } catch (error) {
+    console.error('[Autofill] AI 자동완성 오류:', error);
+
+    let errorMessage = "자동완성 중 오류가 발생했습니다.";
+    if (error.message.includes('Chrome AI')) {
+      errorMessage = "Chrome AI를 사용할 수 없습니다. API 모드를 사용하거나 Chrome 127 이상으로 업데이트하세요.";
+    } else if (error.message.includes('API')) {
+      errorMessage = "OpenAI API 오류가 발생했습니다. API 키와 크레딧을 확인하세요.";
     }
-  }
 
-  // 해외 경험 자동완성
-  if (savedData.overseas) {
-    try {
-      filledCount += await fillOverseas(savedData.overseas);
-    } catch (error) {
-      console.error("해외 경험 자동완성 오류:", error);
-      errorCount++;
-    }
-  }
-
-  // 어학점수 자동완성
-  if (savedData.languageScores) {
-    try {
-      filledCount += await fillLanguageScores(savedData.languageScores);
-    } catch (error) {
-      console.error("어학점수 자동완성 오류:", error);
-      errorCount++;
-    }
-  }
-
-  // 자격증 자동완성
-  if (savedData.certificates) {
-    try {
-      filledCount += await fillCertificates(savedData.certificates);
-    } catch (error) {
-      console.error("자격증 자동완성 오류:", error);
-      errorCount++;
-    }
-  }
-
-  // 장애사항, 보훈여부 자동완성
-  if (savedData.disabilityVeteran) {
-    try {
-      filledCount += await fillDisabilityVeteran(savedData.disabilityVeteran);
-    } catch (error) {
-      console.error("장애사항/보훈여부 자동완성 오류:", error);
-      errorCount++;
-    }
-  }
-
-  if (errorCount > 0) {
-    showNotification(
-      `${filledCount}개 필드 자동완성 (${errorCount}개 섹션 오류)`,
-      "success",
-      getFilledFieldsList()
-    );
-  } else {
-    showNotification(
-      `${filledCount}개 필드가 자동완성되었습니다!`,
-      "success",
-      getFilledFieldsList()
-    );
+    showNotification(errorMessage, "error", []);
   }
 }
 
-// 개인정보 자동완성 (V2: async)
-async function fillPersonalInfo(personalInfo) {
-  const dateFormat = personalInfo.dateFormat || "hyphen";
+/**
+ * 채워지지 않은 필드 감지
+ * @param {Object} userData - 사용자 데이터
+ * @returns {Array<Object>} - 채워지지 않은 필드 목록 [{fieldName, expectedValue}, ...]
+ */
+function detectMissedFields(userData) {
+  const missedFields = [];
 
-  const mappings = [
-    { data: personalInfo.name, keywords: ["이름", "name", "성명", "한글명"] },
-    {
-      data: formatDate(personalInfo.birthdate, dateFormat),
-      keywords: ["생년월일", "birth", "생일", "출생"],
-    },
-    { data: personalInfo.gender, keywords: ["성별", "gender", "남녀"] },
-    {
-      data: personalInfo.nationality,
-      keywords: ["국적", "nationality", "국가"],
-    },
-    {
-      data: personalInfo.nameEnglish,
-      keywords: ["영문명", "english", "영어이름"],
-    },
-    {
-      data: personalInfo.nameChinese,
-      keywords: ["한자명", "chinese", "한자이름"],
-    },
-    { data: personalInfo.address, keywords: ["주소", "address", "거주지"] },
-    {
-      data: personalInfo.militaryService,
-      keywords: ["병역", "military", "군필", "미필"],
-    },
-  ];
+  // 개인정보 필수 필드 체크
+  if (userData.personalInfo) {
+    const personalFields = [
+      { key: 'name', label: '이름' },
+      { key: 'phone', label: '전화번호' },
+      { key: 'email', label: '이메일' },
+      { key: 'gender', label: '성별' },
+      { key: 'birthdate', label: '생년월일' },
+      { key: 'address', label: '주소' },
+      { key: 'nationality', label: '국적' },
+      { key: 'militaryService', label: '병역사항' },
+    ];
 
-  let filledCount = await fillFieldsByKeywords(mappings);
-
-  // 생년월일 분리 필드 처리 (년/월/일)
-  if (personalInfo.birthdate) {
-    try {
-      // 생년월일을 객체로 변환
-      const birthdateObj = parseDateString(personalInfo.birthdate);
-      if (birthdateObj) {
-        const dateResult = await fillDateFields(
-          birthdateObj,
-          ["생년월일", "birth", "생일", "출생"],
-          savedData
-        );
-        if (dateResult > 0) filledCount += dateResult;
+    personalFields.forEach(field => {
+      if (userData.personalInfo[field.key]) {
+        // 해당 필드가 페이지에 존재하는지, 채워졌는지 확인
+        const isEmpty = isFieldEmpty(field.key, userData.personalInfo[field.key]);
+        if (isEmpty) {
+          missedFields.push({
+            fieldName: field.label,
+            expectedValue: formatValueForDisplay(userData.personalInfo[field.key])
+          });
+        }
       }
-    } catch (error) {
-      console.error("생년월일 분리 필드 입력 오류:", error);
+    });
+  }
+
+  // 학력 필드 체크
+  if (userData.education) {
+    if (userData.education.highschool?.name) {
+      if (isFieldEmpty('highschool', userData.education.highschool.name)) {
+        missedFields.push({
+          fieldName: '고등학교',
+          expectedValue: userData.education.highschool.name
+        });
+      }
+    }
+    if (userData.education.university?.name) {
+      if (isFieldEmpty('university', userData.education.university.name)) {
+        missedFields.push({
+          fieldName: '대학교',
+          expectedValue: userData.education.university.name
+        });
+      }
     }
   }
 
-  // 비밀번호 필드 처리 (2개까지 허용 - 비밀번호 + 비밀번호 확인)
-  if (personalInfo.password) {
-    try {
-      const passwordKeywords = ["비밀번호", "password", "pw", "passwd"];
+  // 경력 필드 체크
+  if (userData.careers && userData.careers.length > 0) {
+    const firstCareer = userData.careers[0];
+    if (firstCareer.companyName) {
+      if (isFieldEmpty('career', firstCareer.companyName)) {
+        missedFields.push({
+          fieldName: '경력 (회사명)',
+          expectedValue: firstCareer.companyName
+        });
+      }
+    }
+  }
 
-      // 첫 번째 비밀번호 필드
-      const passwordField1 = findFieldByKeywords(passwordKeywords, 0);
-      if (passwordField1) {
-        await fillField(passwordField1, personalInfo.password);
-        filledCount++;
+  return missedFields;
+}
+
+/**
+ * 특정 필드가 페이지에서 비어있는지 확인
+ * @param {string} fieldType - 필드 타입 (name, phone, email 등)
+ * @param {*} expectedValue - 예상 값
+ * @returns {boolean} - 비어있으면 true
+ */
+function isFieldEmpty(fieldType, expectedValue) {
+  // 페이지의 모든 입력 필드 검색
+  const inputs = Array.from(document.querySelectorAll('input, textarea, select'));
+
+  // 필드 타입에 따른 키워드 매칭
+  const keywords = getFieldKeywords(fieldType);
+  const expectedString = String(expectedValue).toLowerCase();
+
+  for (const input of inputs) {
+    // name, id, placeholder, label 등에서 키워드 찾기
+    const fieldName = (input.name || '').toLowerCase();
+    const fieldId = (input.id || '').toLowerCase();
+    const fieldPlaceholder = (input.placeholder || '').toLowerCase();
+    const fieldLabel = getFieldLabel(input).toLowerCase();
+
+    const fieldText = `${fieldName} ${fieldId} ${fieldPlaceholder} ${fieldLabel}`;
+
+    // 키워드 매칭
+    const hasKeyword = keywords.some(keyword => fieldText.includes(keyword));
+
+    if (hasKeyword) {
+      // 해당 필드가 비어있거나 기본값인 경우
+      const currentValue = (input.value || '').toLowerCase().trim();
+
+      if (!currentValue || currentValue === '' || currentValue === 'select' || currentValue === '선택') {
+        return true; // 비어있음
       }
 
-      // 두 번째 비밀번호 필드 (비밀번호 확인)
-      const passwordField2 = findFieldByKeywords(passwordKeywords, 1);
-      if (passwordField2) {
-        await fillField(passwordField2, personalInfo.password);
-        filledCount++;
-      }
-    } catch (error) {
-      console.error("비밀번호 입력 오류:", error);
+      // 값이 채워져 있으면 false 반환
+      return false;
     }
   }
 
-  // 전화번호 분리 필드 처리
-  if (personalInfo.phone) {
-    try {
-      const phoneResult = await fillPhoneNumber(personalInfo.phone, ["phone", "휴대폰", "핸드폰", "연락처"]);
-      if (phoneResult > 0) filledCount += phoneResult;
-    } catch (error) {
-      console.error("전화번호 입력 오류:", error);
-    }
-  }
-
-  // 이메일 분리 필드 처리 (이메일 확인 필드 포함)
-  if (personalInfo.email) {
-    try {
-      const emailResult = await fillEmailAddress(personalInfo.email, ["email", "이메일", "메일"], true);
-      if (emailResult > 0) filledCount += emailResult;
-    } catch (error) {
-      console.error("이메일 입력 오류:", error);
-    }
-  }
-
-  // 사진 파일 자동 첨부
-  if (personalInfo.photo) {
-    try {
-      fillPhotoFields(personalInfo.photo);
-      filledCount++;
-    } catch (error) {
-      console.error("사진 첨부 오류:", error);
-    }
-  }
-
-  return filledCount;
+  // 필드를 찾지 못했으면 (DOM에 없음) 실패로 간주
+  return true;
 }
 
-// 학력 자동완성 (V2: async)
-async function fillEducation(education) {
-  let filledCount = 0;
-  const dateFormat = savedData.personalInfo.dateFormat || "hyphen";
+/**
+ * 필드 타입에 따른 키워드 반환
+ */
+function getFieldKeywords(fieldType) {
+  const keywordMap = {
+    name: ['name', '이름', '성명', '성함'],
+    phone: ['phone', 'tel', 'mobile', '전화', '연락처', '휴대폰'],
+    email: ['email', '이메일', '메일'],
+    gender: ['gender', 'sex', '성별'],
+    birthdate: ['birth', 'birthday', '생년월일', '생일'],
+    address: ['address', '주소', '거주지'],
+    nationality: ['nationality', '국적'],
+    militaryService: ['military', '병역', '군필'],
+    highschool: ['highschool', 'high_school', '고등학교', '고교'],
+    university: ['university', 'college', '대학교', '대학'],
+    career: ['company', 'career', 'work', '회사', '경력', '근무'],
+  };
 
-  // 고등학교
-  if (education.highschool) {
-    const highschoolMappings = [
-      {
-        data: education.highschool.name,
-        keywords: ["고등학교", "highschool", "고교"],
-      },
-      {
-        data: formatDate(education.highschool.start, dateFormat),
-        keywords: ["고등학교입학", "고교입학"],
-      },
-      {
-        data: formatDate(education.highschool.graduation, dateFormat),
-        keywords: ["고등학교졸업", "고교졸업"],
-      },
-      {
-        data: education.highschool.type,
-        keywords: ["고등학교계열", "고교계열"],
-      },
-    ];
-    filledCount += await fillFieldsByKeywords(highschoolMappings);
-  }
-
-  // 대학교
-  if (education.university) {
-    const universityMappings = [
-      {
-        data: education.university.name,
-        keywords: ["대학교", "university", "대학"],
-      },
-      {
-        data: formatDate(education.university.start, dateFormat),
-        keywords: ["대학교입학", "대학입학"],
-      },
-      {
-        data: formatDate(education.university.graduation, dateFormat),
-        keywords: ["대학교졸업", "대학졸업"],
-      },
-      {
-        data: education.university.type,
-        keywords: ["전공계열", "대학교계열", "대학계열"],
-      },
-      { data: education.university.major, keywords: ["전공", "major", "학과"] },
-      { data: education.university.degree, keywords: ["학위", "degree"] },
-      { data: education.university.gpa, keywords: ["학점", "gpa", "성적"] },
-      {
-        data: education.university.maxGpa,
-        keywords: ["기준학점", "만점", "max"],
-      },
-    ];
-    filledCount += await fillFieldsByKeywords(universityMappings);
-  }
-
-  return filledCount;
+  return keywordMap[fieldType] || [];
 }
 
-// 경력 자동완성 (V2: async)
-async function fillCareers(careers) {
-  let filledCount = 0;
-  const dateFormat = savedData.personalInfo.dateFormat || "hyphen";
-
-  for (let index = 0; index < careers.length; index++) {
-    const career = careers[index];
-    const careerMappings = [
-      {
-        data: career.career_company,
-        keywords: ["회사명", "company", "근무회사"],
-      },
-      {
-        data: career.career_department,
-        keywords: ["소속", "부서", "department"],
-      },
-      {
-        data: career.career_position,
-        keywords: ["직급", "직책", "position", "담당"],
-      },
-      {
-        data: formatDate(career.career_start, dateFormat),
-        keywords: ["재직시작", "입사", "start"],
-      },
-      {
-        data: formatDate(career.career_end, dateFormat),
-        keywords: ["재직종료", "퇴사", "end"],
-      },
-      {
-        data: career.career_description,
-        keywords: ["담당업무", "업무내용", "description"],
-      },
-    ];
-
-    filledCount += await fillFieldsByKeywords(careerMappings, index);
+/**
+ * input 요소의 label 텍스트 가져오기
+ */
+function getFieldLabel(input) {
+  // label[for="id"] 찾기
+  if (input.id) {
+    const label = document.querySelector(`label[for="${input.id}"]`);
+    if (label) return label.textContent || '';
   }
 
-  return filledCount;
-}
+  // 부모 label 찾기
+  const parentLabel = input.closest('label');
+  if (parentLabel) return parentLabel.textContent || '';
 
-// 외부활동 자동완성 (V2: async)
-async function fillActivities(activities) {
-  let filledCount = 0;
-  const dateFormat = savedData.personalInfo.dateFormat || "hyphen";
-
-  for (let index = 0; index < activities.length; index++) {
-    const activity = activities[index];
-    const activityMappings = [
-      { data: activity.activity_type, keywords: ["활동분류", "분류", "type"] },
-      {
-        data: activity.activity_organization,
-        keywords: ["기관", "장소", "organization"],
-      },
-      {
-        data: formatDate(activity.activity_start, dateFormat),
-        keywords: ["활동시작", "시작연월"],
-      },
-      {
-        data: formatDate(activity.activity_end, dateFormat),
-        keywords: ["활동종료", "종료연월"],
-      },
-      { data: activity.activity_name, keywords: ["활동명", "프로젝트명"] },
-      {
-        data: activity.activity_description,
-        keywords: ["활동내용", "내용", "description"],
-      },
-    ];
-
-    filledCount += await fillFieldsByKeywords(activityMappings, index);
+  // 이전 형제 label 찾기
+  if (input.previousElementSibling?.tagName === 'LABEL') {
+    return input.previousElementSibling.textContent || '';
   }
 
-  return filledCount;
+  return '';
 }
 
-// 해외 경험 자동완성 (V2: async)
-async function fillOverseas(overseas) {
-  let filledCount = 0;
-  const dateFormat = savedData.personalInfo.dateFormat || "hyphen";
-
-  for (let index = 0; index < overseas.length; index++) {
-    const overseasItem = overseas[index];
-    const overseasMappings = [
-      { data: overseasItem.overseas_country, keywords: ["국가", "country"] },
-      { data: overseasItem.overseas_purpose, keywords: ["목적", "purpose"] },
-      {
-        data: formatDate(overseasItem.overseas_start, dateFormat),
-        keywords: ["해외시작", "시작기간"],
-      },
-      {
-        data: formatDate(overseasItem.overseas_end, dateFormat),
-        keywords: ["해외종료", "종료기간"],
-      },
-      {
-        data: overseasItem.overseas_institution,
-        keywords: ["기관", "학교명", "institution"],
-      },
-      {
-        data: overseasItem.overseas_description,
-        keywords: ["해외내용", "상세내용"],
-      },
-    ];
-
-    filledCount += await fillFieldsByKeywords(overseasMappings, index);
+/**
+ * 값을 표시용으로 포맷팅
+ */
+function formatValueForDisplay(value) {
+  if (typeof value === 'object') {
+    return JSON.stringify(value);
   }
-
-  return filledCount;
+  return String(value).substring(0, 50); // 최대 50자
 }
 
-// 어학점수 자동완성 (V2: async)
-async function fillLanguageScores(languageScores) {
-  let filledCount = 0;
-  const dateFormat = savedData.personalInfo.dateFormat || "hyphen";
+/**
+ * 사용자에게 실패한 필드 피드백 표시
+ * @param {Array<Object>} missedFields - 실패한 필드 목록
+ */
+function showUserFeedback(missedFields) {
+  console.log('[Autofill] 사용자 피드백 표시:', missedFields);
 
-  for (let index = 0; index < languageScores.length; index++) {
-    const score = languageScores[index];
-    const scoreMappings = [
-      {
-        data: score.language_test_type,
-        keywords: ["어학시험", "test", "종류"],
-      },
-      { data: score.language_score, keywords: ["점수", "score", "점"] },
-      {
-        data: formatDate(score.language_date, dateFormat),
-        keywords: ["취득일", "date", "시험일"],
-      },
-      {
-        data: formatDate(score.language_expiry, dateFormat),
-        keywords: ["만료일", "expiry", "유효기간"],
-      },
-    ];
+  const fieldList = missedFields.map(f => `• ${f.fieldName}: ${f.expectedValue}`).join('\n');
 
-    filledCount += await fillFieldsByKeywords(scoreMappings, index);
+  showNotification(
+    `⚠️ 일부 필드를 자동으로 채우지 못했습니다.\n수동으로 입력이 필요한 필드 (${missedFields.length}개):\n\n${fieldList}`,
+    "warning",
+    []
+  );
+}
+
+// Chrome 익스텐션 메시지 리스너
+chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
+  if (request.action === "fillForm") {
+    savedData = request.data;
+    console.log('[Autofill] 데이터 수신:', savedData);
+
+    // 자동완성 실행
+    autoFillForm().then(() => {
+      sendResponse({ success: true });
+    }).catch(error => {
+      console.error('[Autofill] 오류:', error);
+      sendResponse({ success: false, error: error.message });
+    });
+
+    return true; // 비동기 응답을 위해 true 반환
   }
+});
 
-  return filledCount;
-}
-
-// 자격증 자동완성 (V2: async)
-async function fillCertificates(certificates) {
-  let filledCount = 0;
-  const dateFormat = savedData.personalInfo.dateFormat || "hyphen";
-
-  for (let index = 0; index < certificates.length; index++) {
-    const certificate = certificates[index];
-    const certificateMappings = [
-      {
-        data: certificate.certificate_name,
-        keywords: ["자격증명", "certificate", "자격"],
-      },
-      {
-        data: certificate.certificate_issuer,
-        keywords: ["발급기관", "issuer", "기관"],
-      },
-      {
-        data: certificate.certificate_registration_number,
-        keywords: ["등록번호", "registration"],
-      },
-      {
-        data: certificate.certificate_license_number,
-        keywords: ["자격번호", "license"],
-      },
-      {
-        data: formatDate(certificate.certificate_date, dateFormat),
-        keywords: ["취득일", "date", "발급일"],
-      },
-    ];
-
-    filledCount += await fillFieldsByKeywords(certificateMappings, index);
-  }
-
-  return filledCount;
-}
-
-// 장애사항, 보훈여부 자동완성 (V2: async)
-async function fillDisabilityVeteran(disabilityVeteran) {
-  const mappings = [
-    {
-      data: disabilityVeteran.disabilityStatus,
-      keywords: ["장애사항", "disability"],
-    },
-    {
-      data: disabilityVeteran.disabilityGrade,
-      keywords: ["장애등급", "disability_grade"],
-    },
-    {
-      data: disabilityVeteran.veteranStatus,
-      keywords: ["보훈여부", "veteran"],
-    },
-    {
-      data: disabilityVeteran.veteranGrade,
-      keywords: ["보훈등급", "veteran_grade"],
-    },
-  ];
-
-  return await fillFieldsByKeywords(mappings);
-}
+console.log('[Autofill] V4 자동완성 스크립트 로드 완료 (완전 AI 자율 방식)');
