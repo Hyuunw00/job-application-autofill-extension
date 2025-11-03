@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "입사지원 자동완성",
-  "version": "1.0.0",
-  "description": "입사지원 시 개인정보를 자동으로 입력해주는 크롬 익스텐션",
+  "version": "2.0.0",
+  "description": "AI가 스스로 판단하여 입사지원 폼을 자동으로 채워주는 크롬 익스텐션",
   "permissions": ["storage", "activeTab"],
   "action": {
     "default_popup": "popup/popup.html",
@@ -15,17 +15,27 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
+      "js": ["content/main-world-executor.js"],
+      "world": "MAIN",
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["<all_urls>"],
       "js": [
         "content/utils.js",
         "content/field-finder.js",
         "content/field-filler.js",
-        "content/special-handlers.js",
+        "content/code-executor.js",
+        "content/ai-engine.js",
         "content/autofill.js",
         "content/ui.js",
         "content/index.js"
       ],
       "run_at": "document_idle"
     }
+  ],
+  "host_permissions": [
+    "https://api.openai.com/*"
   ],
   "icons": {
     "16": "icons/icon16.png",
