@@ -2,6 +2,37 @@
 
 // 폼에 데이터 채우기 함수
 function populateForm(data) {
+  // AI 설정
+  if (data.aiSettings) {
+    // 모드 선택
+    const mode = data.aiSettings.mode || 'free';
+    const modeRadio = document.getElementById(`ai_mode_${mode}`);
+    if (modeRadio) {
+      modeRadio.checked = true;
+      // API 모드일 경우 설정 표시
+      const apiSettings = document.getElementById("api_mode_settings");
+      if (mode === 'api' && apiSettings) {
+        apiSettings.style.display = "block";
+      }
+    }
+
+    // API 키
+    if (data.aiSettings.apiKey) {
+      const apiKeyInput = document.getElementById("openai_api_key");
+      if (apiKeyInput) {
+        apiKeyInput.value = data.aiSettings.apiKey;
+      }
+    }
+
+    // 모델
+    if (data.aiSettings.model) {
+      const modelSelect = document.getElementById("openai_model");
+      if (modelSelect) {
+        modelSelect.value = data.aiSettings.model;
+      }
+    }
+  }
+
   // 개인정보
   if (data.personalInfo) {
     // 사진 처리
@@ -18,16 +49,23 @@ function populateForm(data) {
     const simpleFields = {
       name: "name",
       phone: "phone",
+      emergencyContact: "emergency_contact",
+      availableDate: "available_date",
       password: "password",
       gender: "gender",
       nationality: "nationality",
       nameEnglish: "name_english",
       nameChinese: "name_chinese",
       address: "address",
+      addressDetail: "address_detail",
+      applicationPath: "application_path",
+      desiredSalary: "desired_salary",
+      previousSalary: "previous_salary",
       dateFormat: "date_format",
       militaryService: "military_service",
       militaryBranch: "military_branch",
       militaryRank: "military_rank",
+      militarySpecialty: "military_specialty",
     };
 
     Object.keys(simpleFields).forEach((key) => {
@@ -84,7 +122,9 @@ function populateForm(data) {
     if (data.education.highschool) {
       const hs = data.education.highschool;
       if (hs.name) document.getElementById("highschool_name").value = hs.name;
-      if (hs.type) setSelectValue("highschool_type", "highschool_type_custom", hs.type);
+      if (hs.admissionStatus) document.getElementById("highschool_admission_status").value = hs.admissionStatus;
+      if (hs.graduationStatus) document.getElementById("highschool_graduation_status").value = hs.graduationStatus;
+      if (hs.type) document.getElementById("highschool_type").value = hs.type;
       if (hs.start) setDateFields("highschool_start", hs.start);
       if (hs.graduation) setDateFields("highschool_graduation", hs.graduation);
     }
@@ -93,10 +133,17 @@ function populateForm(data) {
     if (data.education.university) {
       const uni = data.education.university;
       if (uni.name) document.getElementById("university_name").value = uni.name;
-      if (uni.type) setSelectValue("university_type", "university_type_custom", uni.type);
+      if (uni.campusType) document.getElementById("university_campus_type").value = uni.campusType;
+      if (uni.admissionStatus) document.getElementById("university_admission_status").value = uni.admissionStatus;
+      if (uni.graduationStatus) document.getElementById("university_graduation_status").value = uni.graduationStatus;
+      if (uni.dayNight) document.getElementById("university_day_night").value = uni.dayNight;
+      if (uni.type) document.getElementById("university_type").value = uni.type;
+      if (uni.departmentCategory) document.getElementById("university_department_category").value = uni.departmentCategory;
       if (uni.major) document.getElementById("university_major").value = uni.major;
+      if (uni.majorType) document.getElementById("university_major_type").value = uni.majorType;
       if (uni.degree) document.getElementById("university_degree").value = uni.degree;
       if (uni.gpa) document.getElementById("university_gpa").value = uni.gpa;
+      if (uni.gpaMax) document.getElementById("university_gpa_max").value = uni.gpaMax;
       if (uni.maxGpa) document.getElementById("university_max_gpa").value = uni.maxGpa;
       if (uni.start) setDateFields("university_start", uni.start);
       if (uni.graduation) setDateFields("university_graduation", uni.graduation);
@@ -109,13 +156,50 @@ function populateForm(data) {
   populateDynamicData("activity", data.activities);
   populateDynamicData("overseas", data.overseas);
   populateDynamicData("language-score", data.languageScores);
+  populateDynamicData("education", data.educations);
+
+  // 증명서
+  if (data.documents) {
+    if (data.documents.transcript !== undefined) {
+      const el = document.getElementById("document_transcript");
+      if (el) el.checked = data.documents.transcript;
+    }
+    if (data.documents.graduation !== undefined) {
+      const el = document.getElementById("document_graduation");
+      if (el) el.checked = data.documents.graduation;
+    }
+    if (data.documents.certificate !== undefined) {
+      const el = document.getElementById("document_certificate");
+      if (el) el.checked = data.documents.certificate;
+    }
+    if (data.documents.language !== undefined) {
+      const el = document.getElementById("document_language");
+      if (el) el.checked = data.documents.language;
+    }
+    if (data.documents.other !== undefined) {
+      const el = document.getElementById("document_other");
+      if (el) el.checked = data.documents.other;
+    }
+    if (data.documents.notes) {
+      const el = document.getElementById("document_notes");
+      if (el) el.value = data.documents.notes;
+    }
+  }
 
   // 장애사항, 보훈여부
   if (data.disabilityVeteran) {
-    Object.keys(data.disabilityVeteran).forEach((key) => {
-      const element = document.getElementById(key);
-      if (element) element.value = data.disabilityVeteran[key];
-    });
+    if (data.disabilityVeteran.disabilityStatus) {
+      document.getElementById("disability_status").value = data.disabilityVeteran.disabilityStatus;
+    }
+    if (data.disabilityVeteran.disabilityGrade) {
+      document.getElementById("disability_grade").value = data.disabilityVeteran.disabilityGrade;
+    }
+    if (data.disabilityVeteran.veteranStatus) {
+      document.getElementById("veteran_status").value = data.disabilityVeteran.veteranStatus;
+    }
+    if (data.disabilityVeteran.veteranGrade) {
+      document.getElementById("veteran_grade").value = data.disabilityVeteran.veteranGrade;
+    }
   }
 }
 
@@ -138,8 +222,22 @@ function populateDynamicData(type, items) {
     if (firstItem) {
       Object.keys(items[0]).forEach((key) => {
         const input = firstItem.querySelector(`.${key}`);
-        if (input) input.value = items[0][key];
+        if (input) {
+          if (input.type === 'checkbox') {
+            input.checked = items[0][key];
+          } else {
+            input.value = items[0][key];
+          }
+        }
       });
+
+      // 경력 항목이면 재직중 체크박스 이벤트 트리거
+      if (type === 'career') {
+        const checkbox = firstItem.querySelector('.career_is_current');
+        if (checkbox) {
+          checkbox.dispatchEvent(new Event('change'));
+        }
+      }
     }
   }
 
@@ -167,29 +265,8 @@ function setDateFields(prefix, dateObj) {
   }
 }
 
-// 셀렉트 박스 값 설정 (직접입력 포함)
-function setSelectValue(selectId, customInputId, value) {
-  const select = document.getElementById(selectId);
-  const customInput = document.getElementById(customInputId);
-
-  if (!select || !value) return;
-
-  // 옵션 목록에서 값 찾기
-  const options = select.querySelectorAll("option");
-  let found = false;
-
-  for (let option of options) {
-    if (option.value === value) {
-      select.value = value;
-      found = true;
-      break;
-    }
-  }
-
-  // 옵션에 없으면 직접입력으로 설정
-  if (!found && customInput) {
-    select.value = "직접입력";
-    customInput.value = value;
-    customInput.style.display = "block";
-  }
+// 셀렉트 박스 값 설정 (더 이상 필요 없음 - text input으로 변경됨)
+function setSelectValue() {
+  // 모두 text input으로 변경되어 이 함수는 사용되지 않음
+  // 하위 호환성을 위해 남겨둠
 }

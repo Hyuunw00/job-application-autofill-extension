@@ -13,6 +13,85 @@
 
     <div class="container-scroll">
 
+      <!-- AI 설정 섹션 -->
+      <section class="section ai-settings-section">
+        <h2>🤖 AI 자동완성 설정</h2>
+
+        <!-- 무료 모드 카드 -->
+        <div class="ai-mode-card" id="free_mode_card">
+          <div class="ai-mode-header">
+            <input type="radio" name="ai_mode" value="free" id="ai_mode_free" checked>
+            <label for="ai_mode_free">
+              <strong>무료 모드 (Chrome AI)</strong>
+            </label>
+          </div>
+          <div class="ai-mode-description">
+            <div style="display: flex; align-items: start; gap: 8px; margin-bottom: 6px;">
+              <span style="color: #27ae60;">ℹ️</span>
+              <span>Chrome 브라우저 내장 AI 사용 (완전 무료, 로컬 실행)</span>
+            </div>
+            <div style="display: flex; align-items: start; gap: 8px; margin-bottom: 6px;">
+              <span style="color: #e67e22;">⚠️</span>
+              <span>Chrome 127 이상 + 실험 기능 활성화 필요</span>
+            </div>
+            <div class="api-links" style="background: rgba(255,255,255,0.15); padding: 10px; border-radius: 6px; margin-top: 8px;">
+              <div style="font-weight: 600; margin-bottom: 4px; color: #e67e22;">⚠️ Chrome AI는 현재 실험 단계입니다</div>
+              <div style="font-size: 12px; line-height: 1.6;">
+                Chrome Canary/Dev 버전에서만 사용 가능하며, 정식 Chrome에서는 지원되지 않을 수 있습니다.<br>
+                <strong style="color: #fff;">→ API 모드(유료) 사용을 권장합니다</strong> (페이지당 ~0.7원)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- API 모드 카드 -->
+        <div class="ai-mode-card" id="api_mode_card">
+          <div class="ai-mode-header">
+            <input type="radio" name="ai_mode" value="api" id="ai_mode_api">
+            <label for="api_mode_api">
+              <strong>API 모드 (유료, 고정확도)</strong>
+            </label>
+          </div>
+
+          <div id="api_mode_settings" class="api-mode-settings">
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label style="font-weight: 600; margin-bottom: 8px; display: block;">OpenAI API 키</label>
+              <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                <input
+                  type="password"
+                  id="openai_api_key"
+                  placeholder="sk-proj-..."
+                  style="flex: 1; font-family: monospace; font-size: 12px; padding: 10px;"
+                />
+                <button type="button" id="test_api_key" class="btn-secondary" style="width: auto; padding: 10px 20px; white-space: nowrap;">
+                  테스트
+                </button>
+              </div>
+              <div class="api-links">
+                🔗 API 키 발급:
+                <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a>
+                <br>
+                💳 결제 정보 등록 필요:
+                <a href="https://platform.openai.com/account/billing/overview" target="_blank">billing 설정</a>
+              </div>
+              <div id="api_key_status"></div>
+            </div>
+
+            <div class="form-group">
+              <label style="font-weight: 600; margin-bottom: 8px; display: block;">모델 선택</label>
+              <select id="openai_model" style="padding: 10px;">
+                <option value="gpt-4o-mini" selected>GPT-4o-mini (추천, ~0.7원/페이지)</option>
+                <option value="gpt-4o">GPT-4o (최고 성능, ~7원/페이지)</option>
+                <option value="gpt-3.5-turbo">GPT-3.5-turbo (저렴, ~2원/페이지)</option>
+              </select>
+              <div class="model-hint">
+                💡 대부분의 경우 GPT-4o-mini로 충분합니다
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- 개인정보 섹션 -->
       <section class="section">
         <h2>개인정보</h2>
@@ -56,6 +135,14 @@
           <input type="text" id="phone" placeholder="010-1234-5678" />
         </div>
         <div class="form-group">
+          <label>긴급연락처</label>
+          <input type="text" id="emergency_contact" placeholder="010-9876-5432" />
+        </div>
+        <div class="form-group">
+          <label>입사가능일자</label>
+          <input type="text" id="available_date" placeholder="즉시 또는 YYYY-MM-DD" />
+        </div>
+        <div class="form-group">
           <label>설정할 비밀번호</label>
           <input
             type="password"
@@ -84,11 +171,7 @@
         </div>
         <div class="form-group">
           <label>성별</label>
-          <select id="gender">
-            <option value="">선택하세요</option>
-            <option value="남">남</option>
-            <option value="여">여</option>
-          </select>
+          <input type="text" id="gender" placeholder="예: 남, 여, Male, Female" />
         </div>
         <div class="form-group">
           <label>국적</label>
@@ -136,29 +219,37 @@
           <input type="text" id="address" placeholder="서울시 강남구" />
         </div>
         <div class="form-group">
+          <label>상세주소</label>
+          <input type="text" id="address_detail" placeholder="101동 1001호" />
+        </div>
+        <div class="form-group">
+          <label>지원경로</label>
+          <input type="text" id="application_path" placeholder="예: 사람인, 잡코리아, 추천" />
+        </div>
+        <div class="form-group">
+          <label>희망연봉</label>
+          <input type="text" id="desired_salary" placeholder="예: 회사 내규에 따름, 3500만원" />
+        </div>
+        <div class="form-group">
+          <label>직전연봉</label>
+          <input type="text" id="previous_salary" placeholder="예: 3200만원" />
+        </div>
+        <div class="form-group">
           <label>병역사항</label>
-          <select id="military_service">
-            <option value="">선택하세요</option>
-            <option value="군필">군필</option>
-            <option value="미필">미필</option>
-            <option value="면제">면제</option>
-            <option value="해당없음">해당없음</option>
-          </select>
+          <input type="text" id="military_service" placeholder="예: 군필, 미필, 면제, 해당없음" />
         </div>
         <div id="military_details" style="display: none;">
           <div class="form-group">
             <label>군별</label>
-            <select id="military_branch">
-              <option value="">선택하세요</option>
-              <option value="육군">육군</option>
-              <option value="해군">해군</option>
-              <option value="공군">공군</option>
-              <option value="해병대">해병대</option>
-            </select>
+            <input type="text" id="military_branch" placeholder="예: 육군, 해군, 공군, 해병대" />
           </div>
           <div class="form-group">
             <label>계급</label>
             <input type="text" id="military_rank" placeholder="병장" />
+          </div>
+          <div class="form-group">
+            <label>병과</label>
+            <input type="text" id="military_specialty" placeholder="예: 포병, 보병, 통신" />
           </div>
           <div class="form-group">
             <label>입대년월일</label>
@@ -219,6 +310,14 @@
           <input type="text" id="highschool_name" placeholder="○○고등학교" />
         </div>
         <div class="form-group">
+          <label>입학여부</label>
+          <input type="text" id="highschool_admission_status" placeholder="예: 입학, 편입" />
+        </div>
+        <div class="form-group">
+          <label>졸업여부</label>
+          <input type="text" id="highschool_graduation_status" placeholder="예: 졸업, 졸업예정, 재학, 중퇴" />
+        </div>
+        <div class="form-group">
           <label>입학년월일</label>
           <div class="date-group">
             <input
@@ -266,27 +365,29 @@
         </div>
         <div class="form-group">
           <label>고등학교 계열</label>
-          <select id="highschool_type">
-            <option value="">선택하세요</option>
-            <option value="인문계">인문계</option>
-            <option value="자연계">자연계</option>
-            <option value="예체능계">예체능계</option>
-            <option value="특성화고">특성화고</option>
-            <option value="직접입력">직접입력</option>
-            <option value="기타">기타</option>
-          </select>
-          <input
-            type="text"
-            id="highschool_type_custom"
-            placeholder="직접 입력하세요"
-            style="display: none; margin-top: 5px"
-          />
+          <input type="text" id="highschool_type" placeholder="예: 인문계, 자연계, 예체능계, 특성화고" />
         </div>
 
         <h3>대학교</h3>
         <div class="form-group">
           <label>학교명</label>
           <input type="text" id="university_name" placeholder="○○대학교" />
+        </div>
+        <div class="form-group">
+          <label>본교/분교 여부</label>
+          <input type="text" id="university_campus_type" placeholder="예: 본교, 분교" />
+        </div>
+        <div class="form-group">
+          <label>입학여부</label>
+          <input type="text" id="university_admission_status" placeholder="예: 입학, 편입, 학사편입" />
+        </div>
+        <div class="form-group">
+          <label>졸업여부</label>
+          <input type="text" id="university_graduation_status" placeholder="예: 졸업, 졸업예정, 재학, 휴학, 중퇴" />
+        </div>
+        <div class="form-group">
+          <label>주간/야간 여부</label>
+          <input type="text" id="university_day_night" placeholder="예: 주간, 야간" />
         </div>
         <div class="form-group">
           <label>입학년월일</label>
@@ -336,33 +437,31 @@
         </div>
         <div class="form-group">
           <label>전공계열</label>
-          <select id="university_type">
-            <option value="">선택하세요</option>
-            <option value="인문사회계열">인문사회계열</option>
-            <option value="자연공학계열">자연공학계열</option>
-            <option value="예체능계열">예체능계열</option>
-            <option value="의학계열">의학계열</option>
-            <option value="직접입력">직접입력</option>
-            <option value="기타">기타</option>
-          </select>
-          <input
-            type="text"
-            id="university_type_custom"
-            placeholder="직접 입력하세요"
-            style="display: none; margin-top: 5px"
-          />
+          <input type="text" id="university_type" placeholder="예: 인문사회계열, 자연공학계열, 예체능계열, 의학계열" />
+        </div>
+        <div class="form-group">
+          <label>학과계열</label>
+          <input type="text" id="university_department_category" placeholder="예: 공학, 인문, 자연과학" />
         </div>
         <div class="form-group">
           <label>학과</label>
           <input type="text" id="university_major" placeholder="컴퓨터공학과" />
         </div>
         <div class="form-group">
+          <label>전공여부</label>
+          <input type="text" id="university_major_type" placeholder="예: 주전공, 복수전공, 부전공" />
+        </div>
+        <div class="form-group">
           <label>학위</label>
           <input type="text" id="university_degree" placeholder="학사" />
         </div>
         <div class="form-group">
-          <label>학점</label>
-          <input type="text" id="university_gpa" placeholder="3.5" />
+          <label>취득평점 / 전체평점</label>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="text" id="university_gpa" placeholder="3.9" style="flex: 1;" />
+            <span>/</span>
+            <input type="text" id="university_gpa_max" placeholder="4.5" style="flex: 1;" />
+          </div>
         </div>
         <div class="form-group">
           <label>기준학점</label>
@@ -397,6 +496,20 @@
               />
             </div>
             <div class="form-group">
+              <label>고용형태</label>
+              <input
+                type="text"
+                class="career_employment_type"
+                placeholder="예: 정규직, 계약직, 파견직, 인턴"
+              />
+            </div>
+            <div class="form-group checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" class="career_is_current" />
+                <span>재직중</span>
+              </label>
+            </div>
+            <div class="form-group">
               <label>재직기간 (시작)</label>
               <div class="date-group">
                 <input
@@ -419,7 +532,7 @@
                 />
               </div>
             </div>
-            <div class="form-group">
+            <div class="form-group career-end-date-group">
               <label>재직기간 (종료)</label>
               <div class="date-group">
                 <input
@@ -449,6 +562,14 @@
                 placeholder="주요 담당 업무를 입력하세요"
               ></textarea>
             </div>
+            <div class="form-group">
+              <label>퇴직사유</label>
+              <input
+                type="text"
+                class="career_resignation_reason"
+                placeholder="예: 이직, 계약만료, 개인사정"
+              />
+            </div>
           </div>
         </div>
         <button id="add-career" class="btn-secondary">경력 추가</button>
@@ -462,13 +583,7 @@
             <h3>활동 1</h3>
             <div class="form-group">
               <label>분류</label>
-              <select class="activity_type">
-                <option value="">선택하세요</option>
-                <option value="수상">수상</option>
-                <option value="교육">교육</option>
-                <option value="프로젝트">프로젝트</option>
-                <option value="기타">기타</option>
-              </select>
+              <input type="text" class="activity_type" placeholder="예: 수상, 교육, 프로젝트, 기타" />
             </div>
             <div class="form-group">
               <label>기관/장소</label>
@@ -556,15 +671,7 @@
             </div>
             <div class="form-group">
               <label>목적</label>
-              <select class="overseas_purpose">
-                <option value="">선택하세요</option>
-                <option value="유학">유학</option>
-                <option value="어학연수">어학연수</option>
-                <option value="교환학생">교환학생</option>
-                <option value="인턴십">인턴십</option>
-                <option value="여행">여행</option>
-                <option value="기타">기타</option>
-              </select>
+              <input type="text" class="overseas_purpose" placeholder="예: 유학, 어학연수, 교환학생, 인턴십" />
             </div>
             <div class="form-group">
               <label>기간 (시작)</label>
@@ -640,21 +747,15 @@
             <h3>어학점수 1</h3>
             <div class="form-group">
               <label>어학시험 종류</label>
-              <select class="language_test_type">
-                <option value="">선택하세요</option>
-                <option value="TOEIC">TOEIC</option>
-                <option value="TOEFL">TOEFL</option>
-                <option value="IELTS">IELTS</option>
-                <option value="OPIc">OPIc</option>
-                <option value="TEPS">TEPS</option>
-                <option value="JLPT">JLPT</option>
-                <option value="HSK">HSK</option>
-                <option value="기타">기타</option>
-              </select>
+              <input type="text" class="language_test_type" placeholder="예: TOEIC, TOEFL, IELTS, OPIc, TEPS, JLPT, HSK" />
             </div>
             <div class="form-group">
               <label>점수</label>
               <input type="text" class="language_score" placeholder="850" />
+            </div>
+            <div class="form-group">
+              <label>회화수준</label>
+              <input type="text" class="language_speaking_level" placeholder="예: 상, 중, 하 / 유창, 보통, 기초" />
             </div>
             <div class="form-group">
               <label>취득일</label>
@@ -775,67 +876,101 @@
         <button id="add-certificate" class="btn-secondary">자격증 추가</button>
       </section>
 
+      <!-- 교육이수사항 섹션 -->
+      <section class="section">
+        <h2>교육이수사항</h2>
+        <div id="education-container">
+          <div class="education-item">
+            <h3>교육 1</h3>
+            <div class="form-group">
+              <label>교육명</label>
+              <input type="text" class="education_name" placeholder="예: AI 실무과정" />
+            </div>
+            <div class="form-group">
+              <label>교육기관</label>
+              <input type="text" class="education_organization" placeholder="예: 한국산업인력공단" />
+            </div>
+            <div class="form-group">
+              <label>교육시작일</label>
+              <div class="date-group">
+                <input type="text" class="education_start_year" placeholder="년" maxlength="4" />
+                <input type="text" class="education_start_month" placeholder="월" maxlength="2" />
+                <input type="text" class="education_start_day" placeholder="일" maxlength="2" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>교육종료일</label>
+              <div class="date-group">
+                <input type="text" class="education_end_year" placeholder="년" maxlength="4" />
+                <input type="text" class="education_end_month" placeholder="월" maxlength="2" />
+                <input type="text" class="education_end_day" placeholder="일" maxlength="2" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>교육시간</label>
+              <input type="text" class="education_hours" placeholder="예: 120시간" />
+            </div>
+            <div class="form-group">
+              <label>활동내용</label>
+              <textarea class="education_description" placeholder="교육 활동 내용을 입력하세요"></textarea>
+            </div>
+          </div>
+        </div>
+        <button id="add-education" class="btn-secondary">교육 추가</button>
+      </section>
+
+      <!-- 증명서 섹션 -->
+      <section class="section">
+        <h2>증명서 첨부</h2>
+        <div class="form-group">
+          <label>증명서 종류 (복수 선택 가능)</label>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <label style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="document_transcript" value="성적증명서" />
+              <span>성적증명서</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="document_graduation" value="졸업증명서" />
+              <span>졸업증명서</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="document_certificate" value="자격증" />
+              <span>자격증</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="document_language" value="공인외국어" />
+              <span>공인외국어</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="document_other" value="기타" />
+              <span>기타</span>
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>증명서 파일 첨부 (실제 첨부는 웹사이트에서)</label>
+          <input type="text" id="document_notes" placeholder="첨부할 증명서 메모" />
+        </div>
+      </section>
+
       <!-- 장애사항, 보훈여부 섹션 -->
       <section class="section">
         <h2>장애사항, 보훈여부</h2>
         <div class="form-group">
           <label>장애사항</label>
-          <select id="disability_status">
-            <option value="">해당없음</option>
-            <option value="시각장애">시각장애</option>
-            <option value="청각장애">청각장애</option>
-            <option value="지체장애">지체장애</option>
-            <option value="지적장애">지적장애</option>
-            <option value="자폐성장애">자폐성장애</option>
-            <option value="정신장애">정신장애</option>
-            <option value="뇌병변장애">뇌병변장애</option>
-            <option value="신장장애">신장장애</option>
-            <option value="심장장애">심장장애</option>
-            <option value="호흡기장애">호흡기장애</option>
-            <option value="간장애">간장애</option>
-            <option value="안면장애">안면장애</option>
-            <option value="장루/요루장애">장루/요루장애</option>
-            <option value="간질장애">간질장애</option>
-            <option value="기타">기타</option>
-          </select>
+          <input type="text" id="disability_status" placeholder="예: 해당없음, 시각장애, 청각장애, 지체장애" />
         </div>
         <div class="form-group">
           <label>장애등급</label>
-          <select id="disability_grade">
-            <option value="">해당없음</option>
-            <option value="1급">1급</option>
-            <option value="2급">2급</option>
-            <option value="3급">3급</option>
-            <option value="4급">4급</option>
-            <option value="5급">5급</option>
-            <option value="6급">6급</option>
-          </select>
+          <input type="text" id="disability_grade" placeholder="예: 해당없음, 1급, 2급, 3급" />
         </div>
         <div class="form-group">
           <label>보훈여부</label>
-          <select id="veteran_status">
-            <option value="">해당없음</option>
-            <option value="국가유공자">국가유공자</option>
-            <option value="보훈대상자">보훈대상자</option>
-            <option value="5.18민주화운동관련자">5.18민주화운동관련자</option>
-            <option value="특수임무유공자">특수임무유공자</option>
-            <option value="기타">기타</option>
-          </select>
+          <input type="text" id="veteran_status" placeholder="예: 해당없음, 국가유공자, 보훈대상자" />
         </div>
         <div class="form-group">
           <label>보훈등급</label>
-          <select id="veteran_grade">
-            <option value="">해당없음</option>
-            <option value="1급">1급</option>
-            <option value="2급">2급</option>
-            <option value="3급">3급</option>
-            <option value="4급">4급</option>
-            <option value="5급">5급</option>
-            <option value="6급">6급</option>
-            <option value="7급">7급</option>
-            <option value="8급">8급</option>
-            <option value="9급">9급</option>
-          </select>
+          <input type="text" id="veteran_grade" placeholder="예: 해당없음, 1급, 2급, 3급" />
         </div>
       </section>
 

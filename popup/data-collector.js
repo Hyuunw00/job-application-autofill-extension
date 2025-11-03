@@ -18,6 +18,13 @@ async function collectFormData() {
   }
 
   const data = {
+    // AI 설정
+    aiSettings: {
+      mode: document.querySelector('input[name="ai_mode"]:checked')?.value || 'free',
+      apiKey: document.getElementById("openai_api_key")?.value || '',
+      model: document.getElementById("openai_model")?.value || 'gpt-4o-mini',
+    },
+
     // 개인정보
     personalInfo: {
       name: document.getElementById("name").value,
@@ -27,6 +34,8 @@ async function collectFormData() {
         day: document.getElementById("birthdate_day").value,
       },
       phone: document.getElementById("phone").value,
+      emergencyContact: document.getElementById("emergency_contact").value,
+      availableDate: document.getElementById("available_date").value,
       password: document.getElementById("password").value,
       photo: photoData,
       dateFormat: document.getElementById("date_format").value,
@@ -39,9 +48,14 @@ async function collectFormData() {
         domain: document.getElementById("email_domain").value,
       },
       address: document.getElementById("address").value,
+      addressDetail: document.getElementById("address_detail").value,
+      applicationPath: document.getElementById("application_path").value,
+      desiredSalary: document.getElementById("desired_salary").value,
+      previousSalary: document.getElementById("previous_salary").value,
       militaryService: document.getElementById("military_service").value,
       militaryBranch: document.getElementById("military_branch")?.value || "",
       militaryRank: document.getElementById("military_rank")?.value || "",
+      militarySpecialty: document.getElementById("military_specialty")?.value || "",
       militaryEnlistmentDate: {
         year: document.getElementById("military_enlistment_year")?.value || "",
         month: document.getElementById("military_enlistment_month")?.value || "",
@@ -58,6 +72,8 @@ async function collectFormData() {
     education: {
       highschool: {
         name: document.getElementById("highschool_name").value,
+        admissionStatus: document.getElementById("highschool_admission_status").value,
+        graduationStatus: document.getElementById("highschool_graduation_status").value,
         start: {
           year: document.getElementById("highschool_start_year").value,
           month: document.getElementById("highschool_start_month").value,
@@ -68,10 +84,14 @@ async function collectFormData() {
           month: document.getElementById("highschool_graduation_month").value,
           day: document.getElementById("highschool_graduation_day").value,
         },
-        type: getSelectValue("highschool_type", "highschool_type_custom"),
+        type: document.getElementById("highschool_type").value,
       },
       university: {
         name: document.getElementById("university_name").value,
+        campusType: document.getElementById("university_campus_type").value,
+        admissionStatus: document.getElementById("university_admission_status").value,
+        graduationStatus: document.getElementById("university_graduation_status").value,
+        dayNight: document.getElementById("university_day_night").value,
         start: {
           year: document.getElementById("university_start_year").value,
           month: document.getElementById("university_start_month").value,
@@ -82,10 +102,13 @@ async function collectFormData() {
           month: document.getElementById("university_graduation_month").value,
           day: document.getElementById("university_graduation_day").value,
         },
-        type: getSelectValue("university_type", "university_type_custom"),
+        type: document.getElementById("university_type").value,
+        departmentCategory: document.getElementById("university_department_category").value,
         major: document.getElementById("university_major").value,
+        majorType: document.getElementById("university_major_type").value,
         degree: document.getElementById("university_degree").value,
         gpa: document.getElementById("university_gpa").value,
+        gpaMax: document.getElementById("university_gpa_max").value,
         maxGpa: document.getElementById("university_max_gpa").value,
       },
     },
@@ -104,6 +127,19 @@ async function collectFormData() {
 
     // 자격증
     certificates: collectDynamicData("certificate"),
+
+    // 교육이수사항
+    educations: collectDynamicData("education"),
+
+    // 증명서
+    documents: {
+      transcript: document.getElementById("document_transcript")?.checked || false,
+      graduation: document.getElementById("document_graduation")?.checked || false,
+      certificate: document.getElementById("document_certificate")?.checked || false,
+      language: document.getElementById("document_language")?.checked || false,
+      other: document.getElementById("document_other")?.checked || false,
+      notes: document.getElementById("document_notes")?.value || "",
+    },
 
     // 장애사항, 보훈여부
     disabilityVeteran: {
@@ -133,7 +169,11 @@ function collectDynamicData(type) {
     inputs.forEach((input) => {
       const className = input.className;
       if (className) {
-        item[className] = input.value;
+        if (input.type === 'checkbox') {
+          item[className] = input.checked;
+        } else {
+          item[className] = input.value;
+        }
       }
     });
 
@@ -151,6 +191,7 @@ function getContainerId(type) {
     activity: "activities-container",
     overseas: "overseas-container",
     "language-score": "language-scores-container",
+    education: "education-container",
   };
 
   return containerMap[type] || "";

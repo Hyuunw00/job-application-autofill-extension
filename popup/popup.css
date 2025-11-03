@@ -119,12 +119,59 @@ h3 {
 .certificate-item,
 .activity-item,
 .overseas-item,
-.language-score-item {
+.language-score-item,
+.education-item {
   margin-bottom: 15px;
   padding: 15px;
   background-color: white;
   border-radius: 6px;
   border: 1px solid #e0e0e0;
+}
+
+/* 체크박스 그룹 스타일 */
+.checkbox-group {
+  margin-bottom: 12px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0 !important;
+  cursor: pointer;
+  user-select: none;
+  padding: 8px 0;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: #3498db;
+}
+
+.checkbox-label span {
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+}
+
+.checkbox-label:hover span {
+  color: #3498db;
+}
+
+/* 비활성화된 종료일 필드 스타일 */
+.career-end-date-group input:disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+  border-color: #e0e0e0;
+}
+
+.career-end-date-group.disabled label {
+  color: #999;
 }
 
 .btn-primary,
@@ -213,4 +260,115 @@ h3 {
 
 .container-scroll::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+/* AI 설정 섹션 스타일 */
+.ai-settings-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.ai-settings-section h2 {
+  color: white;
+  margin-bottom: 16px;
+  font-size: 20px;
+}
+
+/* AI 모드 카드 */
+.ai-mode-card {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.ai-mode-card:last-child {
+  margin-bottom: 0;
+}
+
+.ai-mode-card:has(input:checked) {
+  border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.ai-mode-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.ai-mode-header input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #667eea;
+}
+
+.ai-mode-header label {
+  cursor: pointer;
+  flex: 1;
+  font-size: 16px;
+  color: #2c3e50;
+}
+
+.ai-mode-description {
+  margin-top: 12px;
+  margin-left: 30px;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.6;
+}
+
+/* API 모드 설정 */
+.api-mode-settings {
+  margin-top: 16px;
+  margin-left: 30px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+  display: none;
+}
+
+#api_mode_card:has(#ai_mode_api:checked) .api-mode-settings {
+  display: block;
+}
+
+.api-links {
+  font-size: 12px;
+  color: #666;
+  margin-top: 8px;
+  line-height: 1.6;
+}
+
+.api-links a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.api-links a:hover {
+  text-decoration: underline;
+}
+
+#api_key_status {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.model-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #666;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #667eea;
 }
