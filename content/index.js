@@ -40,7 +40,7 @@ function createAutoFillButton() {
   button.innerHTML = "📝 자동완성";
   button.style.cssText = `
     position: fixed;
-    top: 20px;
+    bottom: 20px;
     right: 20px;
     z-index: 10000;
     background: #3498db;
