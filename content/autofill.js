@@ -25,10 +25,6 @@ async function autoFillForm() {
     field.style.border = '';
   });
 
-  // 사용된 필드 초기화
-  clearUsedFields();
-  clearFilledFieldsList();
-
   try {
     // 1단계: AI가 페이지 분석하고 코드 생성
     showNotification("🤖 AI가 페이지를 분석하고 코드 생성 중...", "info", []);

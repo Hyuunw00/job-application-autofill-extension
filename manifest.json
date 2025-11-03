@@ -22,9 +22,6 @@
     {
       "matches": ["<all_urls>"],
       "js": [
-        "content/utils.js",
-        "content/field-finder.js",
-        "content/field-filler.js",
         "content/code-executor.js",
         "content/ai-engine.js",
         "content/autofill.js",
