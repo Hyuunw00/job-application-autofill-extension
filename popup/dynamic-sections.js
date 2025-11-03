@@ -16,11 +16,22 @@ function addDynamicItem(type, data = {}) {
   if (data) {
     Object.keys(data).forEach((key) => {
       const input = newItem.querySelector(`.${key}`);
-      if (input) input.value = data[key];
+      if (input) {
+        if (input.type === 'checkbox') {
+          input.checked = data[key];
+        } else {
+          input.value = data[key];
+        }
+      }
     });
   }
 
   container.appendChild(newItem);
+
+  // 경력 항목에 재직중 체크박스 이벤트 추가
+  if (type === 'career') {
+    setupCareerCurrentCheckbox(newItem);
+  }
 }
 
 // 항목 템플릿 반환 함수
@@ -42,6 +53,16 @@ function getItemTemplate(type, count) {
           <input type="text" class="career_position" placeholder="백엔드 개발자" />
         </div>
         <div class="form-group">
+          <label>고용형태</label>
+          <input type="text" class="career_employment_type" placeholder="예: 정규직, 계약직, 파견직, 인턴" />
+        </div>
+        <div class="form-group checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" class="career_is_current" />
+            <span>재직중</span>
+          </label>
+        </div>
+        <div class="form-group">
           <label>재직기간 (시작)</label>
           <div class="date-group">
             <input type="text" class="career_start_year" placeholder="년" maxlength="4" />
@@ -49,7 +70,7 @@ function getItemTemplate(type, count) {
             <input type="text" class="career_start_day" placeholder="일" maxlength="2" />
           </div>
         </div>
-        <div class="form-group">
+        <div class="form-group career-end-date-group">
           <label>재직기간 (종료)</label>
           <div class="date-group">
             <input type="text" class="career_end_year" placeholder="년" maxlength="4" />
@@ -60,6 +81,10 @@ function getItemTemplate(type, count) {
         <div class="form-group">
           <label>담당업무</label>
           <textarea class="career_description" placeholder="주요 담당 업무를 입력하세요"></textarea>
+        </div>
+        <div class="form-group">
+          <label>퇴직사유</label>
+          <input type="text" class="career_resignation_reason" placeholder="예: 이직, 계약만료, 개인사정" />
         </div>
         <button type="button" class="btn-danger remove-item" style="margin-top: 10px;">삭제</button>
       </div>
@@ -224,6 +249,44 @@ function getItemTemplate(type, count) {
         <button type="button" class="btn-danger remove-item" style="margin-top: 10px;">삭제</button>
       </div>
     `,
+    education: `
+      <div class="education-item">
+        <h3>교육 ${count}</h3>
+        <div class="form-group">
+          <label>교육명</label>
+          <input type="text" class="education_name" placeholder="예: AI 실무과정" />
+        </div>
+        <div class="form-group">
+          <label>교육기관</label>
+          <input type="text" class="education_organization" placeholder="예: 한국산업인력공단" />
+        </div>
+        <div class="form-group">
+          <label>교육시작일</label>
+          <div class="date-group">
+            <input type="text" class="education_start_year" placeholder="년" maxlength="4" />
+            <input type="text" class="education_start_month" placeholder="월" maxlength="2" />
+            <input type="text" class="education_start_day" placeholder="일" maxlength="2" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>교육종료일</label>
+          <div class="date-group">
+            <input type="text" class="education_end_year" placeholder="년" maxlength="4" />
+            <input type="text" class="education_end_month" placeholder="월" maxlength="2" />
+            <input type="text" class="education_end_day" placeholder="일" maxlength="2" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>교육시간</label>
+          <input type="text" class="education_hours" placeholder="예: 120시간" />
+        </div>
+        <div class="form-group">
+          <label>활동내용</label>
+          <textarea class="education_description" placeholder="교육 활동 내용을 입력하세요"></textarea>
+        </div>
+        <button type="button" class="btn-danger remove-item" style="margin-top: 10px;">삭제</button>
+      </div>
+    `,
   };
 
   return templates[type] || "";
@@ -255,15 +318,62 @@ function addLanguageScore() {
   attachRemoveListeners();
 }
 
+function addEducation() {
+  addDynamicItem("education");
+  attachRemoveListeners();
+}
+
 // 삭제 버튼 이벤트 리스너 추가
 function attachRemoveListeners() {
   document.querySelectorAll(".remove-item").forEach((button) => {
     button.addEventListener("click", function () {
       this.closest(
-        ".career-item, .certificate-item, .activity-item, .overseas-item, .language-score-item"
+        ".career-item, .certificate-item, .activity-item, .overseas-item, .language-score-item, .education-item"
       ).remove();
     });
   });
+}
+
+// 경력 재직중 체크박스 설정
+function setupCareerCurrentCheckbox(careerItem) {
+  const checkbox = careerItem.querySelector('.career_is_current');
+  const endDateGroup = careerItem.querySelector('.career-end-date-group');
+
+  if (checkbox && endDateGroup) {
+    const endYearInput = careerItem.querySelector('.career_end_year');
+    const endMonthInput = careerItem.querySelector('.career_end_month');
+    const endDayInput = careerItem.querySelector('.career_end_day');
+
+    checkbox.addEventListener('change', function() {
+      if (this.checked) {
+        // 재직중이면 종료일 비활성화
+        endYearInput.disabled = true;
+        endMonthInput.disabled = true;
+        endDayInput.disabled = true;
+        endYearInput.value = '';
+        endMonthInput.value = '';
+        endDayInput.value = '';
+        endDateGroup.classList.add('disabled');
+        endDateGroup.style.opacity = '0.5';
+      } else {
+        // 재직중 아니면 종료일 활성화
+        endYearInput.disabled = false;
+        endMonthInput.disabled = false;
+        endDayInput.disabled = false;
+        endDateGroup.classList.remove('disabled');
+        endDateGroup.style.opacity = '1';
+      }
+    });
+
+    // 초기 상태 설정
+    if (checkbox.checked) {
+      endYearInput.disabled = true;
+      endMonthInput.disabled = true;
+      endDayInput.disabled = true;
+      endDateGroup.classList.add('disabled');
+      endDateGroup.style.opacity = '0.5';
+    }
+  }
 }
 
 // 데이터 초기화 함수
@@ -290,6 +400,7 @@ async function clearData() {
         "activity",
         "overseas",
         "language-score",
+        "education",
       ].forEach((type) => {
         const container = document.getElementById(getContainerId(type));
         if (container) {
