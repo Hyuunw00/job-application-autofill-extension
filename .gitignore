@@ -1,0 +1,25 @@
+# Node modules (if added later)
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test files
+test-*.html
+*.test.js
+
+# Build artifacts (if added later)
+dist/
+build/
+
+# Environment
+.env
+.env.local
+EOF
