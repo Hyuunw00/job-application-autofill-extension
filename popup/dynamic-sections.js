@@ -63,20 +63,12 @@ function getItemTemplate(type, count) {
           </label>
         </div>
         <div class="form-group">
-          <label>재직기간 (시작)</label>
-          <div class="date-group">
-            <input type="text" class="career_start_year" placeholder="년" maxlength="4" />
-            <input type="text" class="career_start_month" placeholder="월" maxlength="2" />
-            <input type="text" class="career_start_day" placeholder="일" maxlength="2" />
-          </div>
+          <label>입사일</label>
+          <input type="text" class="career_start_date" placeholder="2020-03-01" />
         </div>
         <div class="form-group career-end-date-group">
-          <label>재직기간 (종료)</label>
-          <div class="date-group">
-            <input type="text" class="career_end_year" placeholder="년" maxlength="4" />
-            <input type="text" class="career_end_month" placeholder="월" maxlength="2" />
-            <input type="text" class="career_end_day" placeholder="일" maxlength="2" />
-          </div>
+          <label>퇴사일</label>
+          <input type="text" class="career_end_date" placeholder="2023-02-28" />
         </div>
         <div class="form-group">
           <label>담당업무</label>
@@ -110,11 +102,7 @@ function getItemTemplate(type, count) {
         </div>
         <div class="form-group">
           <label>취득일</label>
-          <div class="date-group">
-            <input type="text" class="certificate_date_year" placeholder="년" maxlength="4" />
-            <input type="text" class="certificate_date_month" placeholder="월" maxlength="2" />
-            <input type="text" class="certificate_date_day" placeholder="일" maxlength="2" />
-          </div>
+          <input type="text" class="certificate_date" placeholder="2023-06-15" />
         </div>
         <button type="button" class="btn-danger remove-item" style="margin-top: 10px;">삭제</button>
       </div>
@@ -124,33 +112,19 @@ function getItemTemplate(type, count) {
         <h3>활동 ${count}</h3>
         <div class="form-group">
           <label>분류</label>
-          <select class="activity_type">
-            <option value="">선택하세요</option>
-            <option value="수상">수상</option>
-            <option value="교육">교육</option>
-            <option value="프로젝트">프로젝트</option>
-            <option value="기타">기타</option>
-          </select>
+          <input type="text" class="activity_type" placeholder="예: 수상, 교육, 프로젝트, 기타" />
         </div>
         <div class="form-group">
           <label>기관/장소</label>
           <input type="text" class="activity_organization" placeholder="○○기관" />
         </div>
         <div class="form-group">
-          <label>시작년월일</label>
-          <div class="date-group">
-            <input type="text" class="activity_start_year" placeholder="년" maxlength="4" />
-            <input type="text" class="activity_start_month" placeholder="월" maxlength="2" />
-            <input type="text" class="activity_start_day" placeholder="일" maxlength="2" />
-          </div>
+          <label>시작일</label>
+          <input type="text" class="activity_start_date" placeholder="2020-03-01" />
         </div>
         <div class="form-group">
-          <label>종료년월일</label>
-          <div class="date-group">
-            <input type="text" class="activity_end_year" placeholder="년" maxlength="4" />
-            <input type="text" class="activity_end_month" placeholder="월" maxlength="2" />
-            <input type="text" class="activity_end_day" placeholder="일" maxlength="2" />
-          </div>
+          <label>종료일</label>
+          <input type="text" class="activity_end_date" placeholder="2020-12-31" />
         </div>
         <div class="form-group">
           <label>활동명</label>
@@ -172,31 +146,15 @@ function getItemTemplate(type, count) {
         </div>
         <div class="form-group">
           <label>목적</label>
-          <select class="overseas_purpose">
-            <option value="">선택하세요</option>
-            <option value="유학">유학</option>
-            <option value="어학연수">어학연수</option>
-            <option value="교환학생">교환학생</option>
-            <option value="인턴십">인턴십</option>
-            <option value="여행">여행</option>
-            <option value="기타">기타</option>
-          </select>
+          <input type="text" class="overseas_purpose" placeholder="예: 유학, 어학연수, 교환학생, 인턴십" />
         </div>
         <div class="form-group">
-          <label>기간 (시작)</label>
-          <div class="date-group">
-            <input type="text" class="overseas_start_year" placeholder="년" maxlength="4" />
-            <input type="text" class="overseas_start_month" placeholder="월" maxlength="2" />
-            <input type="text" class="overseas_start_day" placeholder="일" maxlength="2" />
-          </div>
+          <label>시작일</label>
+          <input type="text" class="overseas_start_date" placeholder="2020-01-01" />
         </div>
         <div class="form-group">
-          <label>기간 (종료)</label>
-          <div class="date-group">
-            <input type="text" class="overseas_end_year" placeholder="년" maxlength="4" />
-            <input type="text" class="overseas_end_month" placeholder="월" maxlength="2" />
-            <input type="text" class="overseas_end_day" placeholder="일" maxlength="2" />
-          </div>
+          <label>종료일</label>
+          <input type="text" class="overseas_end_date" placeholder="2020-12-31" />
         </div>
         <div class="form-group">
           <label>기관/학교명</label>
@@ -214,37 +172,31 @@ function getItemTemplate(type, count) {
         <h3>어학점수 ${count}</h3>
         <div class="form-group">
           <label>어학시험 종류</label>
-          <select class="language_test_type">
-            <option value="">선택하세요</option>
-            <option value="TOEIC">TOEIC</option>
-            <option value="TOEFL">TOEFL</option>
-            <option value="IELTS">IELTS</option>
-            <option value="OPIc">OPIc</option>
-            <option value="TEPS">TEPS</option>
-            <option value="JLPT">JLPT</option>
-            <option value="HSK">HSK</option>
-            <option value="기타">기타</option>
-          </select>
+          <input type="text" class="language_test_type" placeholder="예: TOEIC, TOEFL, IELTS, OPIc" />
         </div>
         <div class="form-group">
           <label>점수</label>
           <input type="text" class="language_score" placeholder="850" />
         </div>
         <div class="form-group">
+          <label>회화수준</label>
+          <input type="text" class="language_speaking_level" placeholder="예: 상, 중, 하" />
+        </div>
+        <div class="form-group">
           <label>취득일</label>
-          <div class="date-group">
-            <input type="text" class="language_date_year" placeholder="년" maxlength="4" />
-            <input type="text" class="language_date_month" placeholder="월" maxlength="2" />
-            <input type="text" class="language_date_day" placeholder="일" maxlength="2" />
-          </div>
+          <input type="text" class="language_date" placeholder="2023-01-15" />
         </div>
         <div class="form-group">
           <label>만료일 (해당시)</label>
-          <div class="date-group">
-            <input type="text" class="language_expiry_year" placeholder="년" maxlength="4" />
-            <input type="text" class="language_expiry_month" placeholder="월" maxlength="2" />
-            <input type="text" class="language_expiry_day" placeholder="일" maxlength="2" />
-          </div>
+          <input type="text" class="language_expiry_date" placeholder="2025-01-15" />
+        </div>
+        <div class="form-group">
+          <label>등록번호</label>
+          <input type="text" class="language_registration_number" placeholder="등록번호" />
+        </div>
+        <div class="form-group">
+          <label>자격번호</label>
+          <input type="text" class="language_license_number" placeholder="자격번호" />
         </div>
         <button type="button" class="btn-danger remove-item" style="margin-top: 10px;">삭제</button>
       </div>
@@ -262,19 +214,11 @@ function getItemTemplate(type, count) {
         </div>
         <div class="form-group">
           <label>교육시작일</label>
-          <div class="date-group">
-            <input type="text" class="education_start_year" placeholder="년" maxlength="4" />
-            <input type="text" class="education_start_month" placeholder="월" maxlength="2" />
-            <input type="text" class="education_start_day" placeholder="일" maxlength="2" />
-          </div>
+          <input type="text" class="education_start_date" placeholder="2023-01-01" />
         </div>
         <div class="form-group">
           <label>교육종료일</label>
-          <div class="date-group">
-            <input type="text" class="education_end_year" placeholder="년" maxlength="4" />
-            <input type="text" class="education_end_month" placeholder="월" maxlength="2" />
-            <input type="text" class="education_end_day" placeholder="일" maxlength="2" />
-          </div>
+          <input type="text" class="education_end_date" placeholder="2023-06-30" />
         </div>
         <div class="form-group">
           <label>교육시간</label>
@@ -338,28 +282,19 @@ function attachRemoveListeners() {
 function setupCareerCurrentCheckbox(careerItem) {
   const checkbox = careerItem.querySelector('.career_is_current');
   const endDateGroup = careerItem.querySelector('.career-end-date-group');
+  const endDateInput = careerItem.querySelector('.career_end_date');
 
-  if (checkbox && endDateGroup) {
-    const endYearInput = careerItem.querySelector('.career_end_year');
-    const endMonthInput = careerItem.querySelector('.career_end_month');
-    const endDayInput = careerItem.querySelector('.career_end_day');
-
+  if (checkbox && endDateGroup && endDateInput) {
     checkbox.addEventListener('change', function() {
       if (this.checked) {
-        // 재직중이면 종료일 비활성화
-        endYearInput.disabled = true;
-        endMonthInput.disabled = true;
-        endDayInput.disabled = true;
-        endYearInput.value = '';
-        endMonthInput.value = '';
-        endDayInput.value = '';
+        // 재직중이면 퇴사일 비활성화
+        endDateInput.disabled = true;
+        endDateInput.value = '';
         endDateGroup.classList.add('disabled');
         endDateGroup.style.opacity = '0.5';
       } else {
-        // 재직중 아니면 종료일 활성화
-        endYearInput.disabled = false;
-        endMonthInput.disabled = false;
-        endDayInput.disabled = false;
+        // 재직중 아니면 퇴사일 활성화
+        endDateInput.disabled = false;
         endDateGroup.classList.remove('disabled');
         endDateGroup.style.opacity = '1';
       }
@@ -367,9 +302,7 @@ function setupCareerCurrentCheckbox(careerItem) {
 
     // 초기 상태 설정
     if (checkbox.checked) {
-      endYearInput.disabled = true;
-      endMonthInput.disabled = true;
-      endDayInput.disabled = true;
+      endDateInput.disabled = true;
       endDateGroup.classList.add('disabled');
       endDateGroup.style.opacity = '0.5';
     }

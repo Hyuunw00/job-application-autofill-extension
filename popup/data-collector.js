@@ -25,28 +25,20 @@ async function collectFormData() {
       model: document.getElementById("openai_model")?.value || 'gpt-4o-mini',
     },
 
-    // 개인정보
+    // 개인정보 (모든 값은 string)
     personalInfo: {
       name: document.getElementById("name").value,
-      birthdate: {
-        year: document.getElementById("birthdate_year").value,
-        month: document.getElementById("birthdate_month").value,
-        day: document.getElementById("birthdate_day").value,
-      },
+      birthdate: document.getElementById("birthdate").value,
       phone: document.getElementById("phone").value,
       emergencyContact: document.getElementById("emergency_contact").value,
       availableDate: document.getElementById("available_date").value,
       password: document.getElementById("password").value,
       photo: photoData,
-      dateFormat: document.getElementById("date_format").value,
       gender: document.getElementById("gender").value,
       nationality: document.getElementById("nationality").value,
       nameEnglish: document.getElementById("name_english").value,
       nameChinese: document.getElementById("name_chinese").value,
-      email: {
-        id: document.getElementById("email_id").value,
-        domain: document.getElementById("email_domain").value,
-      },
+      email: document.getElementById("email").value,
       address: document.getElementById("address").value,
       addressDetail: document.getElementById("address_detail").value,
       applicationPath: document.getElementById("application_path").value,
@@ -56,34 +48,19 @@ async function collectFormData() {
       militaryBranch: document.getElementById("military_branch")?.value || "",
       militaryRank: document.getElementById("military_rank")?.value || "",
       militarySpecialty: document.getElementById("military_specialty")?.value || "",
-      militaryEnlistmentDate: {
-        year: document.getElementById("military_enlistment_year")?.value || "",
-        month: document.getElementById("military_enlistment_month")?.value || "",
-        day: document.getElementById("military_enlistment_day")?.value || "",
-      },
-      militaryDischargeDate: {
-        year: document.getElementById("military_discharge_year")?.value || "",
-        month: document.getElementById("military_discharge_month")?.value || "",
-        day: document.getElementById("military_discharge_day")?.value || "",
-      },
+      militaryDischargeType: document.getElementById("military_discharge_type")?.value || "",
+      militaryEnlistmentDate: document.getElementById("military_enlistment_date")?.value || "",
+      militaryDischargeDate: document.getElementById("military_discharge_date")?.value || "",
     },
 
-    // 학력
+    // 학력 (모든 값은 string)
     education: {
       highschool: {
         name: document.getElementById("highschool_name").value,
         admissionStatus: document.getElementById("highschool_admission_status").value,
         graduationStatus: document.getElementById("highschool_graduation_status").value,
-        start: {
-          year: document.getElementById("highschool_start_year").value,
-          month: document.getElementById("highschool_start_month").value,
-          day: document.getElementById("highschool_start_day").value,
-        },
-        graduation: {
-          year: document.getElementById("highschool_graduation_year").value,
-          month: document.getElementById("highschool_graduation_month").value,
-          day: document.getElementById("highschool_graduation_day").value,
-        },
+        start: document.getElementById("highschool_start").value,
+        graduation: document.getElementById("highschool_graduation").value,
         type: document.getElementById("highschool_type").value,
       },
       university: {
@@ -92,16 +69,8 @@ async function collectFormData() {
         admissionStatus: document.getElementById("university_admission_status").value,
         graduationStatus: document.getElementById("university_graduation_status").value,
         dayNight: document.getElementById("university_day_night").value,
-        start: {
-          year: document.getElementById("university_start_year").value,
-          month: document.getElementById("university_start_month").value,
-          day: document.getElementById("university_start_day").value,
-        },
-        graduation: {
-          year: document.getElementById("university_graduation_year").value,
-          month: document.getElementById("university_graduation_month").value,
-          day: document.getElementById("university_graduation_day").value,
-        },
+        start: document.getElementById("university_start").value,
+        graduation: document.getElementById("university_graduation").value,
         type: document.getElementById("university_type").value,
         departmentCategory: document.getElementById("university_department_category").value,
         major: document.getElementById("university_major").value,

@@ -27,6 +27,7 @@ async function analyzePageWithAI(userData, aiSettings) {
   // 응답 파싱
   const result = parseSmartAIResponse(response);
   console.log(`[AI Engine] 생성된 코드 길이: ${result.code ? result.code.length : 0} chars`);
+  console.log(`[AI Engine] 생성된 코드:\n`, result.code);
 
   return result;
 }
@@ -75,123 +76,105 @@ function generateSmartPrompt(pageDOM, userData) {
   // 사용자 정보 준비
   const userInfo = prepareUserInfo(userData);
 
-  const prompt = `Fill form. Generate JavaScript code ONLY.
+  const prompt = `You are a form auto-fill assistant. Analyze the HTML and generate JavaScript code to fill the form with user data.
 
-User data:
-${JSON.stringify(userInfo)}
+=== USER DATA ===
+${JSON.stringify(userInfo, null, 2)}
 
-HTML:
+=== HTML ===
 ${pageDOM}
 
-CRITICAL RULES - MUST FOLLOW:
-1. ALWAYS check if element exists (if not found, skip it)
-2. Use ONLY standard CSS selectors (name, id, class, type, value, placeholder)
-3. NEVER use :contains - it's jQuery ONLY and will FAIL
-4. For buttons with text: Use Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('text'))
-5. Dispatch input/change events after setting value
-6. No addEventListener/fetch/localStorage
-7. Execute immediately (no functions/wrappers)
-8. Analyze DOM structure deeply - try multiple selector strategies (name, id, placeholder, label, data-*, aria-*)
+=== RULES ===
+1. Generate executable JavaScript code (no function wrappers, execute immediately)
+2. ALWAYS check element exists before using (if not found, skip)
+3. Use standard CSS selectors only (NEVER use :contains - it will fail)
+4. For finding elements by text: use Array.from().find() pattern
 
-WRONG (❌ WILL FAIL):
-document.querySelector('button:contains("확인")')  // ❌ INVALID SELECTOR
+=== HANDLE ALL FIELD TYPES ===
+- input[type="text"], textarea: set .value
+- input[type="radio"], input[type="checkbox"]: set .checked = true
+- select: set .value or .selectedIndex
+- Custom dropdowns (div-based): find and click the trigger, then click the option
+- Date fields: handle various formats (YYYY-MM-DD, YYYY.MM.DD, YYYY/MM/DD)
 
-CORRECT (✅):
-const buttons = Array.from(document.querySelectorAll('button'));
-const btn = buttons.find(b => b.textContent.includes('확인'));
-if (btn) btn.click();
+=== EVENTS (CRITICAL) ===
+After setting any value, MUST dispatch events:
+- input event: new Event('input', {bubbles: true})
+- change event: new Event('change', {bubbles: true})
 
-More examples:
-// ✅ Text input
-const el = document.querySelector('input[name="name"]');
-if (el) {
-  el.value = 'value';
-  el.dispatchEvent(new Event('input', {bubbles: true}));
-}
+=== SKIP THESE FIELDS ===
+- Address search fields (주소 검색, 우편번호) - these require external API
+- File upload fields
+- CAPTCHA fields
 
-// ✅ Radio/Checkbox
-const radio = document.querySelector('input[value="M"]');
-if (radio) {
-  radio.checked = true;
-  radio.dispatchEvent(new Event('change', {bubbles: true}));
-}
+=== SELECTOR STRATEGIES ===
+Try multiple approaches to find fields:
+- By name, id, placeholder attributes
+- By associated label text
+- By aria-label, data-* attributes
+- By parent element context
 
-// ✅ Select/Dropdown buttons
-const btns = Array.from(document.querySelectorAll('button'));
-const targetBtn = btns.find(b => b.textContent && b.textContent.trim().includes('대한민국'));
-if (targetBtn) targetBtn.click();
-
-// ✅ Find input by label text
-const labels = Array.from(document.querySelectorAll('label'));
-const nameLabel = labels.find(l => l.textContent.includes('이름'));
-if (nameLabel) {
-  const input = nameLabel.querySelector('input') || document.getElementById(nameLabel.getAttribute('for'));
-  if (input) {
-    input.value = '홍길동';
-    input.dispatchEvent(new Event('input', {bubbles: true}));
-  }
-}
-
-Return JSON only:
-{"code":"..."}`;
+Return JSON only: {"code":"..."}`;
 
   return prompt;
 }
 
 /**
- * 사용자 정보 준비
+ * 사용자 정보 준비 (단순화: 모든 값은 이미 string)
  * @param {Object} userData - 원본 사용자 데이터
  * @returns {Object} - AI에게 전달할 정보
  */
 function prepareUserInfo(userData) {
+  const p = userData.personalInfo || {};
+  const edu = userData.education || {};
+
   return {
     개인정보: {
-      이름: userData.personalInfo?.name || '',
-      이메일: userData.personalInfo?.email?.id && userData.personalInfo?.email?.domain
-        ? `${userData.personalInfo.email.id}@${userData.personalInfo.email.domain}`
-        : '',
-      전화번호: userData.personalInfo?.phone || '',
-      긴급연락처: userData.personalInfo?.emergencyContact || '',
-      입사가능일자: userData.personalInfo?.availableDate || '',
-      비밀번호: userData.personalInfo?.password || '',
-      생년월일: formatBirthdate(userData.personalInfo?.birthdate),
-      성별: userData.personalInfo?.gender || '',
-      주소: userData.personalInfo?.address || '',
-      상세주소: userData.personalInfo?.addressDetail || '',
-      지원경로: userData.personalInfo?.applicationPath || '',
-      희망연봉: userData.personalInfo?.desiredSalary || '',
-      직전연봉: userData.personalInfo?.previousSalary || '',
-      국적: userData.personalInfo?.nationality || '',
-      영문명: userData.personalInfo?.nameEnglish || '',
-      한자명: userData.personalInfo?.nameChinese || '',
-      병역사항: userData.personalInfo?.militaryService || '',
-      군별: userData.personalInfo?.militaryBranch || '',
-      계급: userData.personalInfo?.militaryRank || '',
-      병과: userData.personalInfo?.militarySpecialty || '',
-      입대일: formatDateObject(userData.personalInfo?.militaryEnlistmentDate),
-      전역일: formatDateObject(userData.personalInfo?.militaryDischargeDate),
+      이름: p.name || '',
+      이메일: typeof p.email === 'object' ? `${p.email.id}@${p.email.domain}` : (p.email || ''),
+      전화번호: p.phone || '',
+      긴급연락처: p.emergencyContact || '',
+      입사가능일자: p.availableDate || '',
+      비밀번호: p.password || '',
+      생년월일: formatStringOrObject(p.birthdate),
+      성별: p.gender || '',
+      주소: p.address || '',
+      상세주소: p.addressDetail || '',
+      지원경로: p.applicationPath || '',
+      희망연봉: p.desiredSalary || '',
+      직전연봉: p.previousSalary || '',
+      국적: p.nationality || '',
+      영문명: p.nameEnglish || '',
+      한자명: p.nameChinese || '',
+      병역사항: p.militaryService || '',
+      군별: p.militaryBranch || '',
+      계급: p.militaryRank || '',
+      병과: p.militarySpecialty || '',
+      제대유형: p.militaryDischargeType || '',
+      입대일: formatStringOrObject(p.militaryEnlistmentDate),
+      전역일: formatStringOrObject(p.militaryDischargeDate),
     },
     학력: {
-      고등학교: userData.education?.highschool?.name || '',
-      고등학교_입학여부: userData.education?.highschool?.admissionStatus || '',
-      고등학교_졸업여부: userData.education?.highschool?.graduationStatus || '',
-      고등학교_입학: formatDateObject(userData.education?.highschool?.start),
-      고등학교_졸업: formatDateObject(userData.education?.highschool?.graduation),
-      고등학교_계열: userData.education?.highschool?.type || '',
-      대학교: userData.education?.university?.name || '',
-      대학교_본교분교: userData.education?.university?.campusType || '',
-      대학교_입학여부: userData.education?.university?.admissionStatus || '',
-      대학교_졸업여부: userData.education?.university?.graduationStatus || '',
-      대학교_주간야간: userData.education?.university?.dayNight || '',
-      대학교_입학: formatDateObject(userData.education?.university?.start),
-      대학교_졸업: formatDateObject(userData.education?.university?.graduation),
-      학과계열: userData.education?.university?.departmentCategory || '',
-      전공: userData.education?.university?.major || '',
-      전공여부: userData.education?.university?.majorType || '',
-      학위: userData.education?.university?.degree || '',
-      취득평점: userData.education?.university?.gpa || '',
-      전체평점: userData.education?.university?.gpaMax || '',
-      기준학점: userData.education?.university?.maxGpa || '',
+      고등학교: edu.highschool?.name || '',
+      고등학교_입학여부: edu.highschool?.admissionStatus || '',
+      고등학교_졸업여부: edu.highschool?.graduationStatus || '',
+      고등학교_입학: formatStringOrObject(edu.highschool?.start),
+      고등학교_졸업: formatStringOrObject(edu.highschool?.graduation),
+      고등학교_계열: edu.highschool?.type || '',
+      대학교: edu.university?.name || '',
+      대학교_본교분교: edu.university?.campusType || '',
+      대학교_입학여부: edu.university?.admissionStatus || '',
+      대학교_졸업여부: edu.university?.graduationStatus || '',
+      대학교_주간야간: edu.university?.dayNight || '',
+      대학교_입학: formatStringOrObject(edu.university?.start),
+      대학교_졸업: formatStringOrObject(edu.university?.graduation),
+      학과계열: edu.university?.departmentCategory || '',
+      전공: edu.university?.major || '',
+      전공여부: edu.university?.majorType || '',
+      학위: edu.university?.degree || '',
+      취득평점: edu.university?.gpa || '',
+      전체평점: edu.university?.gpaMax || '',
+      기준학점: edu.university?.maxGpa || '',
     },
     경력: userData.careers?.map(c => ({
       회사명: c.career_company || '',
@@ -199,32 +182,16 @@ function prepareUserInfo(userData) {
       직급: c.career_position || '',
       고용형태: c.career_employment_type || '',
       재직중: c.career_is_current ? '재직중' : '',
-      시작일: formatDateObject({
-        year: c.career_start_year,
-        month: c.career_start_month,
-        day: c.career_start_day
-      }),
-      종료일: c.career_is_current ? '재직중' : formatDateObject({
-        year: c.career_end_year,
-        month: c.career_end_month,
-        day: c.career_end_day
-      }),
+      시작일: c.career_start_date || '',
+      종료일: c.career_is_current ? '재직중' : (c.career_end_date || ''),
       퇴직사유: c.career_resignation_reason || '',
       업무내용: c.career_description || '',
     })) || [],
     외부활동: userData.activities?.map(a => ({
       분류: a.activity_type || '',
       기관: a.activity_organization || '',
-      시작일: formatDateObject({
-        year: a.activity_start_year,
-        month: a.activity_start_month,
-        day: a.activity_start_day
-      }),
-      종료일: formatDateObject({
-        year: a.activity_end_year,
-        month: a.activity_end_month,
-        day: a.activity_end_day
-      }),
+      시작일: a.activity_start_date || '',
+      종료일: a.activity_end_date || '',
       활동명: a.activity_name || '',
       내용: a.activity_description || '',
     })) || [],
@@ -232,57 +199,31 @@ function prepareUserInfo(userData) {
       시험종류: l.language_test_type || '',
       점수: l.language_score || '',
       회화수준: l.language_speaking_level || '',
-      취득일: formatDateObject({
-        year: l.language_date_year,
-        month: l.language_date_month,
-        day: l.language_date_day
-      }),
-      만료일: formatDateObject({
-        year: l.language_expiry_year,
-        month: l.language_expiry_month,
-        day: l.language_expiry_day
-      }),
+      취득일: l.language_date || '',
+      만료일: l.language_expiry_date || '',
+      등록번호: l.language_registration_number || '',
+      자격번호: l.language_license_number || '',
     })) || [],
     자격증: userData.certificates?.map(c => ({
       자격증명: c.certificate_name || '',
       발급기관: c.certificate_issuer || '',
-      취득일: formatDateObject({
-        year: c.certificate_date_year,
-        month: c.certificate_date_month,
-        day: c.certificate_date_day
-      }),
+      취득일: c.certificate_date || '',
       등록번호: c.certificate_registration_number || '',
       자격번호: c.certificate_license_number || '',
     })) || [],
     해외경험: userData.overseas?.map(o => ({
       국가: o.overseas_country || '',
       목적: o.overseas_purpose || '',
-      시작일: formatDateObject({
-        year: o.overseas_start_year,
-        month: o.overseas_start_month,
-        day: o.overseas_start_day
-      }),
-      종료일: formatDateObject({
-        year: o.overseas_end_year,
-        month: o.overseas_end_month,
-        day: o.overseas_end_day
-      }),
+      시작일: o.overseas_start_date || '',
+      종료일: o.overseas_end_date || '',
       기관명: o.overseas_institution || '',
       내용: o.overseas_description || '',
     })) || [],
     교육이수: userData.educations?.map(e => ({
       교육명: e.education_name || '',
       교육기관: e.education_organization || '',
-      교육시작일: formatDateObject({
-        year: e.education_start_year,
-        month: e.education_start_month,
-        day: e.education_start_day
-      }),
-      교육종료일: formatDateObject({
-        year: e.education_end_year,
-        month: e.education_end_month,
-        day: e.education_end_day
-      }),
+      교육시작일: e.education_start_date || '',
+      교육종료일: e.education_end_date || '',
       교육시간: e.education_hours || '',
       활동내용: e.education_description || '',
     })) || [],
@@ -301,6 +242,22 @@ function prepareUserInfo(userData) {
       보훈등급: userData.disabilityVeteran?.veteranGrade || '',
     },
   };
+}
+
+/**
+ * string 또는 객체 형식 호환 처리
+ */
+function formatStringOrObject(value) {
+  if (!value) return '';
+  if (typeof value === 'string') return value;
+  // 이전 형식 (객체) 호환
+  if (value.year) {
+    const y = value.year;
+    const m = String(value.month || 1).padStart(2, '0');
+    const d = String(value.day || 1).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+  return '';
 }
 
 /**
@@ -328,7 +285,7 @@ async function callOpenAI(prompt, aiSettings) {
         messages: [
           {
             role: 'system',
-            content: '당신은 웹 페이지 자동화 전문가입니다. DOM을 분석하고 적절한 동작을 판단하여 JSON으로만 응답하세요.'
+            content: 'You are a web form automation expert. Analyze DOM structure and generate JavaScript code. Respond with JSON only.'
           },
           {
             role: 'user',
@@ -416,32 +373,3 @@ function parseSmartAIResponse(response) {
   }
 }
 
-/**
- * 생년월일 포맷팅 헬퍼
- * @param {Object} birthdate - {year, month, day}
- * @returns {string} - YYYY-MM-DD 형식
- */
-function formatBirthdate(birthdate) {
-  if (!birthdate || !birthdate.year) return '';
-
-  const year = birthdate.year;
-  const month = birthdate.month ? String(birthdate.month).padStart(2, '0') : '01';
-  const day = birthdate.day ? String(birthdate.day).padStart(2, '0') : '01';
-
-  return `${year}-${month}-${day}`;
-}
-
-/**
- * 날짜 객체 포맷팅 헬퍼
- * @param {Object} dateObj - {year, month, day}
- * @returns {string} - YYYY-MM-DD 형식
- */
-function formatDateObject(dateObj) {
-  if (!dateObj || !dateObj.year) return '';
-
-  const year = dateObj.year;
-  const month = dateObj.month ? String(dateObj.month).padStart(2, '0') : '01';
-  const day = dateObj.day ? String(dateObj.day).padStart(2, '0') : '01';
-
-  return `${year}-${month}-${day}`;
-}

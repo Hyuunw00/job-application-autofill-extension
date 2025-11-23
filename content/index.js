@@ -71,7 +71,7 @@ function createAutoFillButton() {
 
   // 클릭 이벤트
   button.addEventListener("click", function () {
-    autoFillForm();
+    showPreFillConfirmation();
   });
 
   document.body.appendChild(button);

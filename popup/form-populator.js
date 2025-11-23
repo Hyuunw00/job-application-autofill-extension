@@ -45,9 +45,10 @@ function populateForm(data) {
       }
     }
 
-    // 일반 필드 처리
+    // 일반 필드 처리 (모든 값은 string)
     const simpleFields = {
       name: "name",
+      birthdate: "birthdate",
       phone: "phone",
       emergencyContact: "emergency_contact",
       availableDate: "available_date",
@@ -56,58 +57,44 @@ function populateForm(data) {
       nationality: "nationality",
       nameEnglish: "name_english",
       nameChinese: "name_chinese",
+      email: "email",
       address: "address",
       addressDetail: "address_detail",
       applicationPath: "application_path",
       desiredSalary: "desired_salary",
       previousSalary: "previous_salary",
-      dateFormat: "date_format",
       militaryService: "military_service",
       militaryBranch: "military_branch",
       militaryRank: "military_rank",
       militarySpecialty: "military_specialty",
+      militaryDischargeType: "military_discharge_type",
+      militaryEnlistmentDate: "military_enlistment_date",
+      militaryDischargeDate: "military_discharge_date",
     };
 
     Object.keys(simpleFields).forEach((key) => {
       const elementId = simpleFields[key];
       const element = document.getElementById(elementId);
       if (element && data.personalInfo[key]) {
-        element.value = data.personalInfo[key];
+        // 이전 형식(객체) 호환 처리
+        const value = data.personalInfo[key];
+        if (typeof value === "object") {
+          // 이메일 객체인 경우
+          if (value.id && value.domain) {
+            element.value = `${value.id}@${value.domain}`;
+          }
+          // 날짜 객체인 경우
+          else if (value.year) {
+            const y = value.year;
+            const m = String(value.month || 1).padStart(2, '0');
+            const d = String(value.day || 1).padStart(2, '0');
+            element.value = `${y}-${m}-${d}`;
+          }
+        } else {
+          element.value = value;
+        }
       }
     });
-
-    // 이메일 분리 필드 처리
-    if (data.personalInfo.email) {
-      if (typeof data.personalInfo.email === "object") {
-        // 새로운 형식 (분리된 이메일)
-        if (data.personalInfo.email.id) {
-          document.getElementById("email_id").value = data.personalInfo.email.id;
-        }
-        if (data.personalInfo.email.domain) {
-          document.getElementById("email_domain").value = data.personalInfo.email.domain;
-        }
-      } else {
-        // 이전 형식 (통합 이메일) - 자동 분리
-        const emailParts = data.personalInfo.email.split("@");
-        if (emailParts.length === 2) {
-          document.getElementById("email_id").value = emailParts[0];
-          document.getElementById("email_domain").value = emailParts[1];
-        }
-      }
-    }
-
-    // 생년월일
-    if (data.personalInfo.birthdate) {
-      setDateFields("birthdate", data.personalInfo.birthdate);
-    }
-
-    // 병역 날짜
-    if (data.personalInfo.militaryEnlistmentDate) {
-      setDateFields("military_enlistment", data.personalInfo.militaryEnlistmentDate);
-    }
-    if (data.personalInfo.militaryDischargeDate) {
-      setDateFields("military_discharge", data.personalInfo.militaryDischargeDate);
-    }
 
     // 병역사항이 군필이면 상세 항목 표시
     if (data.personalInfo.militaryService === "군필") {
@@ -125,8 +112,8 @@ function populateForm(data) {
       if (hs.admissionStatus) document.getElementById("highschool_admission_status").value = hs.admissionStatus;
       if (hs.graduationStatus) document.getElementById("highschool_graduation_status").value = hs.graduationStatus;
       if (hs.type) document.getElementById("highschool_type").value = hs.type;
-      if (hs.start) setDateFields("highschool_start", hs.start);
-      if (hs.graduation) setDateFields("highschool_graduation", hs.graduation);
+      if (hs.start) setStringOrDateField("highschool_start", hs.start);
+      if (hs.graduation) setStringOrDateField("highschool_graduation", hs.graduation);
     }
 
     // 대학교
@@ -145,8 +132,8 @@ function populateForm(data) {
       if (uni.gpa) document.getElementById("university_gpa").value = uni.gpa;
       if (uni.gpaMax) document.getElementById("university_gpa_max").value = uni.gpaMax;
       if (uni.maxGpa) document.getElementById("university_max_gpa").value = uni.maxGpa;
-      if (uni.start) setDateFields("university_start", uni.start);
-      if (uni.graduation) setDateFields("university_graduation", uni.graduation);
+      if (uni.start) setStringOrDateField("university_start", uni.start);
+      if (uni.graduation) setStringOrDateField("university_graduation", uni.graduation);
     }
   }
 
@@ -247,21 +234,22 @@ function populateDynamicData(type, items) {
   }
 }
 
-// 날짜 필드 설정 헬퍼 함수
-function setDateFields(prefix, dateObj) {
-  if (!dateObj) return;
+// 날짜 필드 설정 헬퍼 함수 (string 또는 객체 모두 처리)
+function setStringOrDateField(elementId, value) {
+  if (!value) return;
 
-  if (dateObj.year) {
-    const yearEl = document.getElementById(`${prefix}_year`);
-    if (yearEl) yearEl.value = dateObj.year;
-  }
-  if (dateObj.month) {
-    const monthEl = document.getElementById(`${prefix}_month`);
-    if (monthEl) monthEl.value = dateObj.month;
-  }
-  if (dateObj.day) {
-    const dayEl = document.getElementById(`${prefix}_day`);
-    if (dayEl) dayEl.value = dateObj.day;
+  const element = document.getElementById(elementId);
+  if (!element) return;
+
+  if (typeof value === "object" && value.year) {
+    // 이전 형식 (객체) → string으로 변환
+    const y = value.year;
+    const m = String(value.month || 1).padStart(2, '0');
+    const d = String(value.day || 1).padStart(2, '0');
+    element.value = `${y}-${m}-${d}`;
+  } else {
+    // 새 형식 (string)
+    element.value = value;
   }
 }
 
