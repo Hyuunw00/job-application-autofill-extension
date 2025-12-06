@@ -9,21 +9,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // 동적 섹션 추가 버튼들
   document.getElementById("add-career").addEventListener("click", addCareer);
-  document
-    .getElementById("add-certificate")
-    .addEventListener("click", addCertificate);
-  document
-    .getElementById("add-activity")
-    .addEventListener("click", addActivity);
-  document
-    .getElementById("add-overseas")
-    .addEventListener("click", addOverseas);
-  document
-    .getElementById("add-language-score")
-    .addEventListener("click", addLanguageScore);
-  document
-    .getElementById("add-education")
-    .addEventListener("click", addEducation);
+  document.getElementById("add-project").addEventListener("click", addProject);
+  document.getElementById("add-award").addEventListener("click", addAward);
+  document.getElementById("add-activity").addEventListener("click", addActivity);
+  document.getElementById("add-overseas").addEventListener("click", addOverseas);
+  document.getElementById("add-language-score").addEventListener("click", addLanguageScore);
+  document.getElementById("add-certificate").addEventListener("click", addCertificate);
+  document.getElementById("add-education").addEventListener("click", addEducation);
+  document.getElementById("add-computer-skill").addEventListener("click", addComputerSkill);
+  document.getElementById("add-language-skill").addEventListener("click", addLanguageSkill);
 
   // 페이지 로드 시 저장된 데이터 불러오기
   loadData();

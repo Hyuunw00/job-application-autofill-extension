@@ -104,6 +104,58 @@ function getItemTemplate(type, count) {
           <label>취득일</label>
           <input type="text" class="certificate_date" placeholder="2023-06-15" />
         </div>
+        <div class="form-group">
+          <label>만료일 (해당시)</label>
+          <input type="text" class="certificate_expiry_date" placeholder="2026-06-15" />
+        </div>
+        <button type="button" class="btn-danger remove-item" style="margin-top: 10px;">삭제</button>
+      </div>
+    `,
+    project: `
+      <div class="project-item">
+        <h3>프로젝트 ${count}</h3>
+        <div class="form-group">
+          <label>프로젝트명</label>
+          <input type="text" class="project_name" placeholder="○○프로젝트" />
+        </div>
+        <div class="form-group">
+          <label>기관/장소</label>
+          <input type="text" class="project_organization" placeholder="○○기관" />
+        </div>
+        <div class="form-group">
+          <label>시작일</label>
+          <input type="text" class="project_start_date" placeholder="2020-03-01" />
+        </div>
+        <div class="form-group">
+          <label>종료일</label>
+          <input type="text" class="project_end_date" placeholder="2020-12-31" />
+        </div>
+        <div class="form-group">
+          <label>프로젝트 내용</label>
+          <textarea class="project_description" placeholder="프로젝트 내용을 입력하세요"></textarea>
+        </div>
+        <button type="button" class="btn-danger remove-item" style="margin-top: 10px;">삭제</button>
+      </div>
+    `,
+    award: `
+      <div class="award-item">
+        <h3>수상 ${count}</h3>
+        <div class="form-group">
+          <label>수상명</label>
+          <input type="text" class="award_name" placeholder="○○상" />
+        </div>
+        <div class="form-group">
+          <label>수여기관</label>
+          <input type="text" class="award_organization" placeholder="○○기관" />
+        </div>
+        <div class="form-group">
+          <label>수상일</label>
+          <input type="text" class="award_date" placeholder="2020-06-15" />
+        </div>
+        <div class="form-group">
+          <label>수상 내용</label>
+          <textarea class="award_description" placeholder="수상 내용을 입력하세요"></textarea>
+        </div>
         <button type="button" class="btn-danger remove-item" style="margin-top: 10px;">삭제</button>
       </div>
     `,
@@ -111,8 +163,8 @@ function getItemTemplate(type, count) {
       <div class="activity-item">
         <h3>활동 ${count}</h3>
         <div class="form-group">
-          <label>분류</label>
-          <input type="text" class="activity_type" placeholder="예: 수상, 교육, 프로젝트, 기타" />
+          <label>활동명</label>
+          <input type="text" class="activity_name" placeholder="○○활동" />
         </div>
         <div class="form-group">
           <label>기관/장소</label>
@@ -125,10 +177,6 @@ function getItemTemplate(type, count) {
         <div class="form-group">
           <label>종료일</label>
           <input type="text" class="activity_end_date" placeholder="2020-12-31" />
-        </div>
-        <div class="form-group">
-          <label>활동명</label>
-          <input type="text" class="activity_name" placeholder="○○프로젝트" />
         </div>
         <div class="form-group">
           <label>활동 내용</label>
@@ -231,6 +279,50 @@ function getItemTemplate(type, count) {
         <button type="button" class="btn-danger remove-item" style="margin-top: 10px;">삭제</button>
       </div>
     `,
+    "computer-skill": `
+      <div class="computer-skill-item">
+        <h3>컴퓨터활용능력 ${count}</h3>
+        <div class="form-group">
+          <label>활용능력</label>
+          <input type="text" class="computer_skill_type" placeholder="예: QA, 언어, 그래픽, 공학용, 기타" />
+        </div>
+        <div class="form-group">
+          <label>프로그램명</label>
+          <input type="text" class="computer_skill_program" placeholder="예: Python, Photoshop, AutoCAD" />
+        </div>
+        <div class="form-group">
+          <label>활용수준</label>
+          <input type="text" class="computer_skill_level" placeholder="예: 특급, 고급, 중급, 초급, 입문" />
+        </div>
+        <div class="form-group">
+          <label>사용기간</label>
+          <input type="text" class="computer_skill_duration" placeholder="예: 3년, 6개월" />
+        </div>
+        <button type="button" class="btn-danger remove-item" style="margin-top: 10px;">삭제</button>
+      </div>
+    `,
+    "language-skill": `
+      <div class="language-skill-item">
+        <h3>외국어활용능력 ${count}</h3>
+        <div class="form-group">
+          <label>외국어</label>
+          <input type="text" class="language_skill_language" placeholder="예: 영어, 중국어, 일본어" />
+        </div>
+        <div class="form-group">
+          <label>회화수준</label>
+          <input type="text" class="language_skill_speaking" placeholder="예: Lv1, Lv2, Lv3, Lv4, Lv5" />
+        </div>
+        <div class="form-group">
+          <label>작문수준</label>
+          <input type="text" class="language_skill_writing" placeholder="예: Lv1, Lv2, Lv3, Lv4, Lv5" />
+        </div>
+        <div class="form-group">
+          <label>독해수준</label>
+          <input type="text" class="language_skill_reading" placeholder="예: Lv1, Lv2, Lv3, Lv4, Lv5" />
+        </div>
+        <button type="button" class="btn-danger remove-item" style="margin-top: 10px;">삭제</button>
+      </div>
+    `,
   };
 
   return templates[type] || "";
@@ -242,8 +334,13 @@ function addCareer() {
   attachRemoveListeners();
 }
 
-function addCertificate() {
-  addDynamicItem("certificate");
+function addProject() {
+  addDynamicItem("project");
+  attachRemoveListeners();
+}
+
+function addAward() {
+  addDynamicItem("award");
   attachRemoveListeners();
 }
 
@@ -262,8 +359,23 @@ function addLanguageScore() {
   attachRemoveListeners();
 }
 
+function addCertificate() {
+  addDynamicItem("certificate");
+  attachRemoveListeners();
+}
+
 function addEducation() {
   addDynamicItem("education");
+  attachRemoveListeners();
+}
+
+function addComputerSkill() {
+  addDynamicItem("computer-skill");
+  attachRemoveListeners();
+}
+
+function addLanguageSkill() {
+  addDynamicItem("language-skill");
   attachRemoveListeners();
 }
 
@@ -272,7 +384,7 @@ function attachRemoveListeners() {
   document.querySelectorAll(".remove-item").forEach((button) => {
     button.addEventListener("click", function () {
       this.closest(
-        ".career-item, .certificate-item, .activity-item, .overseas-item, .language-score-item, .education-item"
+        ".career-item, .project-item, .award-item, .activity-item, .overseas-item, .language-score-item, .certificate-item, .education-item, .computer-skill-item, .language-skill-item"
       ).remove();
     });
   });
@@ -329,11 +441,15 @@ async function clearData() {
       // 동적 섹션 초기화 (첫 번째 항목만 남기고 삭제)
       [
         "career",
-        "certificate",
+        "project",
+        "award",
         "activity",
         "overseas",
         "language-score",
+        "certificate",
         "education",
+        "computer-skill",
+        "language-skill",
       ].forEach((type) => {
         const container = document.getElementById(getContainerId(type));
         if (container) {

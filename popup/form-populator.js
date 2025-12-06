@@ -139,39 +139,15 @@ function populateForm(data) {
 
   // 동적 섹션들
   populateDynamicData("career", data.careers);
-  populateDynamicData("certificate", data.certificates);
+  populateDynamicData("project", data.projects);
+  populateDynamicData("award", data.awards);
   populateDynamicData("activity", data.activities);
   populateDynamicData("overseas", data.overseas);
   populateDynamicData("language-score", data.languageScores);
+  populateDynamicData("certificate", data.certificates);
   populateDynamicData("education", data.educations);
-
-  // 증명서
-  if (data.documents) {
-    if (data.documents.transcript !== undefined) {
-      const el = document.getElementById("document_transcript");
-      if (el) el.checked = data.documents.transcript;
-    }
-    if (data.documents.graduation !== undefined) {
-      const el = document.getElementById("document_graduation");
-      if (el) el.checked = data.documents.graduation;
-    }
-    if (data.documents.certificate !== undefined) {
-      const el = document.getElementById("document_certificate");
-      if (el) el.checked = data.documents.certificate;
-    }
-    if (data.documents.language !== undefined) {
-      const el = document.getElementById("document_language");
-      if (el) el.checked = data.documents.language;
-    }
-    if (data.documents.other !== undefined) {
-      const el = document.getElementById("document_other");
-      if (el) el.checked = data.documents.other;
-    }
-    if (data.documents.notes) {
-      const el = document.getElementById("document_notes");
-      if (el) el.value = data.documents.notes;
-    }
-  }
+  populateDynamicData("computer-skill", data.computerSkills);
+  populateDynamicData("language-skill", data.languageSkills);
 
   // 장애사항, 보훈여부
   if (data.disabilityVeteran) {

@@ -18,7 +18,7 @@ async function autoFillForm() {
 
   // AI 설정 확인
   const aiSettings = savedData.aiSettings || {
-    mode: "free",
+    mode: "api",
     model: "gpt-4o-mini",
   };
   // console.log('[Autofill] AI 설정:', aiSettings);
@@ -565,7 +565,7 @@ function handleFieldBlur() {
  */
 async function preloadAllSuggestions(missedFields, userData) {
   const aiSettings = userData?.aiSettings || {
-    mode: "free",
+    mode: "api",
     model: "gpt-4o-mini",
   };
 

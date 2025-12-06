@@ -376,23 +376,77 @@
         <button id="add-career" class="btn-secondary">경력 추가</button>
       </section>
 
-      <!-- 외부활동 섹션 -->
+      <!-- 프로젝트 섹션 -->
       <section class="section">
-        <h2>외부활동</h2>
+        <h2>프로젝트</h2>
+        <div id="projects-container">
+          <div class="project-item">
+            <h3>프로젝트 1</h3>
+            <div class="form-group">
+              <label>프로젝트명</label>
+              <input type="text" class="project_name" placeholder="○○프로젝트" />
+            </div>
+            <div class="form-group">
+              <label>기관/장소</label>
+              <input type="text" class="project_organization" placeholder="○○기관" />
+            </div>
+            <div class="form-group">
+              <label>시작일</label>
+              <input type="text" class="project_start_date" placeholder="2020-03-01" />
+            </div>
+            <div class="form-group">
+              <label>종료일</label>
+              <input type="text" class="project_end_date" placeholder="2020-12-31" />
+            </div>
+            <div class="form-group">
+              <label>프로젝트 내용</label>
+              <textarea class="project_description" placeholder="프로젝트 내용을 입력하세요"></textarea>
+            </div>
+          </div>
+        </div>
+        <button id="add-project" class="btn-secondary">프로젝트 추가</button>
+      </section>
+
+      <!-- 수상경력 섹션 -->
+      <section class="section">
+        <h2>수상경력</h2>
+        <div id="awards-container">
+          <div class="award-item">
+            <h3>수상 1</h3>
+            <div class="form-group">
+              <label>수상명</label>
+              <input type="text" class="award_name" placeholder="○○상" />
+            </div>
+            <div class="form-group">
+              <label>수여기관</label>
+              <input type="text" class="award_organization" placeholder="○○기관" />
+            </div>
+            <div class="form-group">
+              <label>수상일</label>
+              <input type="text" class="award_date" placeholder="2020-06-15" />
+            </div>
+            <div class="form-group">
+              <label>수상 내용</label>
+              <textarea class="award_description" placeholder="수상 내용을 입력하세요"></textarea>
+            </div>
+          </div>
+        </div>
+        <button id="add-award" class="btn-secondary">수상 추가</button>
+      </section>
+
+      <!-- 외부활동(기타) 섹션 -->
+      <section class="section">
+        <h2>외부활동(기타)</h2>
         <div id="activities-container">
           <div class="activity-item">
             <h3>활동 1</h3>
             <div class="form-group">
-              <label>분류</label>
-              <input type="text" class="activity_type" placeholder="예: 수상, 교육, 프로젝트, 기타" />
+              <label>활동명</label>
+              <input type="text" class="activity_name" placeholder="○○활동" />
             </div>
             <div class="form-group">
               <label>기관/장소</label>
-              <input
-                type="text"
-                class="activity_organization"
-                placeholder="○○기관"
-              />
+              <input type="text" class="activity_organization" placeholder="○○기관" />
             </div>
             <div class="form-group">
               <label>시작일</label>
@@ -403,19 +457,8 @@
               <input type="text" class="activity_end_date" placeholder="2020-12-31" />
             </div>
             <div class="form-group">
-              <label>활동명</label>
-              <input
-                type="text"
-                class="activity_name"
-                placeholder="○○프로젝트"
-              />
-            </div>
-            <div class="form-group">
               <label>활동 내용</label>
-              <textarea
-                class="activity_description"
-                placeholder="활동 내용을 입력하세요"
-              ></textarea>
+              <textarea class="activity_description" placeholder="활동 내용을 입력하세요"></textarea>
             </div>
           </div>
         </div>
@@ -547,6 +590,10 @@
               <label>취득일</label>
               <input type="text" class="certificate_date" placeholder="2023-06-15" />
             </div>
+            <div class="form-group">
+              <label>만료일 (해당시)</label>
+              <input type="text" class="certificate_expiry_date" placeholder="2026-06-15" />
+            </div>
           </div>
         </div>
         <button id="add-certificate" class="btn-secondary">자격증 추가</button>
@@ -587,38 +634,58 @@
         <button id="add-education" class="btn-secondary">교육 추가</button>
       </section>
 
-      <!-- 증명서 섹션 -->
+      <!-- 컴퓨터활용능력 섹션 -->
       <section class="section">
-        <h2>증명서 첨부</h2>
-        <div class="form-group">
-          <label>증명서 종류 (복수 선택 가능)</label>
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            <label style="display: flex; align-items: center; gap: 8px;">
-              <input type="checkbox" id="document_transcript" value="성적증명서" />
-              <span>성적증명서</span>
-            </label>
-            <label style="display: flex; align-items: center; gap: 8px;">
-              <input type="checkbox" id="document_graduation" value="졸업증명서" />
-              <span>졸업증명서</span>
-            </label>
-            <label style="display: flex; align-items: center; gap: 8px;">
-              <input type="checkbox" id="document_certificate" value="자격증" />
-              <span>자격증</span>
-            </label>
-            <label style="display: flex; align-items: center; gap: 8px;">
-              <input type="checkbox" id="document_language" value="공인외국어" />
-              <span>공인외국어</span>
-            </label>
-            <label style="display: flex; align-items: center; gap: 8px;">
-              <input type="checkbox" id="document_other" value="기타" />
-              <span>기타</span>
-            </label>
+        <h2>컴퓨터활용능력</h2>
+        <div id="computer-skills-container">
+          <div class="computer-skill-item">
+            <h3>컴퓨터활용능력 1</h3>
+            <div class="form-group">
+              <label>활용능력</label>
+              <input type="text" class="computer_skill_type" placeholder="예: QA, 언어, 그래픽, 공학용, 기타" />
+            </div>
+            <div class="form-group">
+              <label>프로그램명</label>
+              <input type="text" class="computer_skill_program" placeholder="예: Python, Photoshop, AutoCAD" />
+            </div>
+            <div class="form-group">
+              <label>활용수준</label>
+              <input type="text" class="computer_skill_level" placeholder="예: 특급, 고급, 중급, 초급, 입문" />
+            </div>
+            <div class="form-group">
+              <label>사용기간</label>
+              <input type="text" class="computer_skill_duration" placeholder="예: 3년, 6개월" />
+            </div>
           </div>
         </div>
-        <div class="form-group">
-          <label>증명서 파일 첨부 (실제 첨부는 웹사이트에서)</label>
-          <input type="text" id="document_notes" placeholder="첨부할 증명서 메모" />
+        <button id="add-computer-skill" class="btn-secondary">컴퓨터활용능력 추가</button>
+      </section>
+
+      <!-- 외국어활용능력 섹션 -->
+      <section class="section">
+        <h2>외국어활용능력</h2>
+        <div id="language-skills-container">
+          <div class="language-skill-item">
+            <h3>외국어활용능력 1</h3>
+            <div class="form-group">
+              <label>외국어</label>
+              <input type="text" class="language_skill_language" placeholder="예: 영어, 중국어, 일본어" />
+            </div>
+            <div class="form-group">
+              <label>회화수준</label>
+              <input type="text" class="language_skill_speaking" placeholder="예: Lv1, Lv2, Lv3, Lv4, Lv5" />
+            </div>
+            <div class="form-group">
+              <label>작문수준</label>
+              <input type="text" class="language_skill_writing" placeholder="예: Lv1, Lv2, Lv3, Lv4, Lv5" />
+            </div>
+            <div class="form-group">
+              <label>독해수준</label>
+              <input type="text" class="language_skill_reading" placeholder="예: Lv1, Lv2, Lv3, Lv4, Lv5" />
+            </div>
+          </div>
         </div>
+        <button id="add-language-skill" class="btn-secondary">외국어활용능력 추가</button>
       </section>
 
       <!-- 장애사항, 보훈여부 섹션 -->

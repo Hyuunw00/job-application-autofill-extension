@@ -85,7 +85,13 @@ async function collectFormData() {
     // 경력
     careers: collectDynamicData("career"),
 
-    // 외부활동
+    // 프로젝트
+    projects: collectDynamicData("project"),
+
+    // 수상경력
+    awards: collectDynamicData("award"),
+
+    // 외부활동(기타)
     activities: collectDynamicData("activity"),
 
     // 해외 경험
@@ -100,15 +106,11 @@ async function collectFormData() {
     // 교육이수사항
     educations: collectDynamicData("education"),
 
-    // 증명서
-    documents: {
-      transcript: document.getElementById("document_transcript")?.checked || false,
-      graduation: document.getElementById("document_graduation")?.checked || false,
-      certificate: document.getElementById("document_certificate")?.checked || false,
-      language: document.getElementById("document_language")?.checked || false,
-      other: document.getElementById("document_other")?.checked || false,
-      notes: document.getElementById("document_notes")?.value || "",
-    },
+    // 컴퓨터활용능력
+    computerSkills: collectDynamicData("computer-skill"),
+
+    // 외국어활용능력
+    languageSkills: collectDynamicData("language-skill"),
 
     // 장애사항, 보훈여부
     disabilityVeteran: {
@@ -156,11 +158,15 @@ function collectDynamicData(type) {
 function getContainerId(type) {
   const containerMap = {
     career: "careers-container",
-    certificate: "certificates-container",
+    project: "projects-container",
+    award: "awards-container",
     activity: "activities-container",
     overseas: "overseas-container",
     "language-score": "language-scores-container",
+    certificate: "certificates-container",
     education: "education-container",
+    "computer-skill": "computer-skills-container",
+    "language-skill": "language-skills-container",
   };
 
   return containerMap[type] || "";
