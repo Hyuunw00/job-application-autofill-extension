@@ -60,9 +60,9 @@ function validateCode(code) {
     }
   }
 
-  // 코드 길이 제한 (10KB)
-  if (code.length > 10000) {
-    throw new Error('보안: 코드가 너무 큽니다 (10KB 제한)');
+  // 코드 길이 제한 (30KB)
+  if (code.length > 30000) {
+    throw new Error('보안: 코드가 너무 큽니다 (30KB 제한)');
   }
 
   console.log('[Code Executor] 보안 검증 통과');

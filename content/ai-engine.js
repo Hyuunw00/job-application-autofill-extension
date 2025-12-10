@@ -84,23 +84,30 @@ ${JSON.stringify(userInfo, null, 2)}
 === HTML ===
 ${pageDOM}
 
+=== AVAILABLE HELPER FUNCTIONS (use these!) ===
+- __getById(id) - find element by ID (safe for special characters)
+- __getByName(name) - find element by name (safe for special characters)
+- __setInputValue(el, value) - set input value (React/Vue compatible)
+- __setTextareaValue(el, value) - set textarea value (React/Vue compatible)
+- __setSelectValue(el, value) - set select value
+- __setChecked(el, checked) - set checkbox/radio
+- __clickElement(el) - click element
+
 === RULES ===
 1. Generate executable JavaScript code (no function wrappers, execute immediately)
-2. ALWAYS check element exists before using (if not found, skip)
-3. Use standard CSS selectors only (NEVER use :contains - it will fail)
+2. USE helper functions above - they handle React/Vue compatibility
+3. IMPORTANT: For strings containing quotes, use proper escaping:
+   - If ID contains single quotes: __getById("전화번호('-' 없이)")
+   - If ID contains double quotes: __getById('field"name')
+   - Or escape: __getById('field\\'s name')
 4. For finding elements by text: use Array.from().find() pattern
 
 === HANDLE ALL FIELD TYPES ===
-- input[type="text"], textarea: set .value
-- input[type="radio"], input[type="checkbox"]: set .checked = true
-- select: set .value or .selectedIndex
+- input[type="text"], textarea: use __setInputValue or __setTextareaValue
+- input[type="radio"], input[type="checkbox"]: use __setChecked
+- select: use __setSelectValue
 - Custom dropdowns (div-based): find and click the trigger, then click the option
 - Date fields: handle various formats (YYYY-MM-DD, YYYY.MM.DD, YYYY/MM/DD)
-
-=== EVENTS (CRITICAL) ===
-After setting any value, MUST dispatch events:
-- input event: new Event('input', {bubbles: true})
-- change event: new Event('change', {bubbles: true})
 
 === SKIP THESE FIELDS ===
 - Address search fields (주소 검색, 우편번호) - these require external API
